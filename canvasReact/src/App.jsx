@@ -5,6 +5,7 @@ import "./App.less";
  * 绘制方法
  */
 let drawType = "";
+const img = new Image();
 const initCanvas = (canvasDom, value) => {
   if (canvasDom) {
     const canvasEle = {
@@ -102,12 +103,18 @@ const initCanvas = (canvasDom, value) => {
       ctx.direction = textQi;
       ctx.fillText(writeText, canvasEle.x0, canvasEle.y0);
     };
-
     //引入图片
-    const liImage = (newDrawType, imgUrl, cWidth, cHeight, x, y) => {
-      // ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+    const liImage = (
+      newDrawType,
+      imgUrl,
+      cWidth,
+      cHeight,
+      x,
+      y,
+      removeX,
+      removeY
+    ) => {
       drawType = newDrawType;
-      const img = new Image();
       img.crossOrigin = "anonymous";
       img.src = imgUrl;
       img.onload = () => {
@@ -119,20 +126,41 @@ const initCanvas = (canvasDom, value) => {
         ctx.stroke();
         ctx.closePath();
         ctx.clip();
-        ctx.drawImage(img, canvasEle.x0, canvasEle.y0);
+        ctx.drawImage(img, removeX, removeY);
         ctx.restore();
       };
       // https://cdn1.mihuiai.com/media/images/5ee5fd5a-f112-4b6b-b742-d58efeaa0775_thumb.png
     };
 
+    //判断是否点击到图像内部
+    const isPointInImage = (point, Image) => {
+      const [touchX, touchY] = point;
+      const [[x1, y1], [x2, y2], [x3, y3], [x4, y4]] = Image;
+      const v1 = [x1 - touchX, y1 - touchY];
+      const v2 = [x2 - touchX, y2 - touchY];
+      const v3 = [x3 - touchX, y3 - touchY];
+      const v4 = [x4 - touchX, y4 - touchY];
+      if (
+        v1[0] * v2[1] - v2[0] * v1[1] > 0 &&
+        v2[0] * v4[1] - v4[0] * v2[1] > 0 &&
+        v4[0] * v3[1] - v3[0] * v4[1] > 0 &&
+        v3[0] * v1[1] - v1[0] * v3[1] > 0
+      ) {
+        return true;
+      }
+      return false;
+    };
+
     //获取像素点
     const pick = (event, divDom) => {
-      const x = event.clientX;
-      const y = event.clientY;
+      const x = event.clientX - 200;
+      const y = event.clientY - 150;
       const pixel = ctx.getImageData(x, y, 1, 1);
       const data = pixel.data;
       const rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`;
-      divDom.style.background = rgba;
+      if (divDom) {
+        divDom.style.background = rgba;
+      }
     };
 
     //贝塞尔曲线
@@ -323,9 +351,9 @@ const initCanvas = (canvasDom, value) => {
       }
     };
     //旋转
-    const rotateImage = (value4, value2) => {
+    const rotateImage = (rool, value2) => {
       const scale = value2 / 50;
-      const rot = (value4 - 50) / 25;
+      const rot = rool;
       ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
       if (drawType === "矩形") {
         // ctx.translate(canvasEle.x0 - 50, canvasEle.y0 - 50);
@@ -376,6 +404,8 @@ const initCanvas = (canvasDom, value) => {
         ctx.stroke();
       }
     };
+    //移动
+
     const clear = () => {
       ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
     };
@@ -480,6 +510,7 @@ const initCanvas = (canvasDom, value) => {
       pick,
       compositeOperation,
       Gradient,
+      isPointInImage,
     };
   }
 };
@@ -499,12 +530,16 @@ const btnDrawFun = (drawType, canvasDom) => {
 
 //导航栏
 function NavigationBar(props) {
-  const { canvasDom, getWriteText, writeText } = props;
+  const { canvasDom, getWriteText, writeText, getX, getY } = props;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
   const [cWidth, setCWidth] = useState(100);
   const [cHeight, setCHeight] = useState(50);
   const [imgUrl, setImgUrl] = useState(null);
+  useEffect(() => {
+    getX(x);
+    getY(y);
+  }, [props]);
   return (
     <div className="navigationBar">
       <ul className="bar">
@@ -560,6 +595,7 @@ function NavigationBar(props) {
                 0
               );
               setImgUrl(e.target.value);
+              console.log(img.width, img.height);
             }}
           />
           <div>
@@ -655,7 +691,7 @@ function Control(props) {
   const [value, setValue] = useState("black");
   const [value2, setValue2] = useState(50);
   const [value3, setValue3] = useState(0);
-  const [value4, setValue4] = useState(0);
+  const [value4, setValue4] = useState(50);
   const [value5, setValue5] = useState(0);
   const [valueX, setValueX] = useState(0);
   const [valueY, setValueY] = useState(0);
@@ -760,7 +796,7 @@ function Control(props) {
           type="range"
           onChange={(e) => {
             setValue4(e.target.value);
-            initCanvas(canvasDom).rotateImage(e.target.value, value2);
+            initCanvas(canvasDom).rotateImage(value4 - e.target.value, value2);
           }}
         />
       </span>
@@ -898,7 +934,7 @@ function Control(props) {
       </div>
       {/* 线条 */}
       <div>
-        直线方法{" "}
+        直线方法
         <span>
           线宽
           <input
@@ -1020,6 +1056,12 @@ function Canvas(props) {
   const { divHoveredDom, divSelectedDom } = props;
   const { canvasWidth = 1000, canvasHeight = 500, getCanvasDom } = props;
   const canvasRef = React.useRef(null);
+  const showFlag = React.useRef(false);
+  const changeX = React.useRef(0);
+  const changeY = React.useRef(0);
+  const changeOldX = React.useRef(0);
+  const changeOldY = React.useRef(0);
+
   useEffect(() => {
     getCanvasDom(canvasRef.current);
   }, [canvasHeight, canvasWidth, props]);
@@ -1029,8 +1071,76 @@ function Canvas(props) {
       ref={canvasRef}
       width={canvasWidth}
       height={canvasHeight}
-      onClick={(e) => initCanvas(canvasRef.current).pick(e, divHoveredDom)}
+      onClick={(e) => {
+        initCanvas(canvasRef.current).pick(e, divHoveredDom);
+      }}
       onMouseMove={(e) => initCanvas(canvasRef.current).pick(e, divSelectedDom)}
+      onMouseDown={(e) => {
+        const { left, top } = canvasRef.current.getBoundingClientRect();
+        let eX = e.clientX - left;
+        let eY = e.clientY - top;
+        const  ctx = canvasRef.current.getContext('2d')
+        if (!showFlag.current) {
+          initCanvas(canvasRef.current).liImage(
+            "图片",
+            "https://cdn1.mihuiai.com/media/images/5ee5fd5a-f112-4b6b-b742-d58efeaa0775_thumb.png",
+            1000,
+            500,
+            0,
+            0,
+            eX,
+            eY
+          );
+          showFlag.current = true;
+          changeOldX.current = eX;
+          changeOldY.current = eY;
+          changeX.current = eX;
+          changeY.current = eY;
+          return;
+        }
+
+
+        if (
+          initCanvas(canvasRef.current).isPointInImage(
+            [eX, eY],
+            [
+              [changeOldX.current, changeOldY.current],
+              [changeOldX.current + img.width, changeOldY.current],
+              [changeOldX.current, changeOldY.current + img.height],
+              [changeOldX.current + img.width, changeOldY.current + img.height],
+            ]
+          )
+        ) {
+          let flag = true
+          canvasRef.current.onmousemove = (e) => {
+            let eX = e.clientX - left;
+            let eY = e.clientY - top;
+            if(!flag){
+              return;
+            }
+            flag  = false
+            setTimeout(()=>{
+              initCanvas(canvasRef.current).liImage(
+                "图片",
+                "https://cdn1.mihuiai.com/media/images/5ee5fd5a-f112-4b6b-b742-d58efeaa0775_thumb.png",
+                1000,
+                500,
+                0,
+                0,
+                changeX.current,
+                changeY.current
+              );
+              changeX.current = eX - changeOldX.current;
+              changeY.current = eY - changeOldY.current;
+              canvasRef.current.onmouseup = () => {
+                canvasRef.current.onmousemove = null;
+              };
+              flag = true
+            },10)
+
+          };
+        }
+      }}
     ></canvas>
   );
 }
@@ -1047,7 +1157,7 @@ function ColorChoose(props) {
   }, [props]);
   return (
     <div className="color-choose">
-      颜色选择器组件
+      颜色选择器
       <div>
         <div id="hovered-color" ref={divHoveredRef}>
           点击获取
@@ -1066,6 +1176,8 @@ function App() {
   const [writeText, setwriteText] = useState(null);
   const [divHoveredDom, setDivHoveredDom] = useState(null);
   const [divSelectedDom, setDivSelectedDom] = useState(null);
+  const [x, setX] = useState(0);
+  const [y, setY] = useState(0);
   return (
     <div>
       <NavigationBar
@@ -1073,6 +1185,8 @@ function App() {
         getdrawType={(type) => setDrawType(type)}
         getWriteText={(type) => setwriteText(type)}
         writeText={writeText}
+        getX={(xValue) => setX(xValue)}
+        getY={(yValue) => setY(yValue)}
       ></NavigationBar>
       <Control
         canvasDom={canvasDom}
@@ -1083,6 +1197,8 @@ function App() {
         getCanvasDom={(dom) => setCanvasDom(dom)}
         divHoveredDom={divHoveredDom}
         divSelectedDom={divSelectedDom}
+        x={x}
+        y={y}
       ></Canvas>
       <ColorChoose
         getDivHoveredDom={(dom) => setDivHoveredDom(dom)}
