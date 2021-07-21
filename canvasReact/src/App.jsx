@@ -8,8 +8,8 @@ let drawType = "";
 const initCanvas = (canvasDom, value) => {
   if (canvasDom) {
     const canvasEle = {
-      x0: 200,
-      y0: 70,
+      x0: 250,
+      y0: 120,
       r: 50,
       rectangleWidth: 100,
       rectangleHeight: 100,
@@ -53,13 +53,22 @@ const initCanvas = (canvasDom, value) => {
       ctx.fill();
     };
     //画线
-    const drawLine = (newDrawType, lineWidthValue, checkedValue, joinValue) => {
+    const drawLine = (
+      newDrawType,
+      lineWidthValue,
+      checkedValue,
+      joinValue,
+      lineDashA,
+      lineDashB,
+      lineDashOffset
+    ) => {
       drawType = newDrawType;
       ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
       ctx.lineCap = checkedValue;
       ctx.lineWidth = lineWidthValue;
       ctx.lineJoin = joinValue;
-      // ctx.setLineDash([lineDashA, lineDashB]);
+      ctx.setLineDash([lineDashA, lineDashB]);
+      ctx.lineDashOffset = -lineDashOffset;
       ctx.beginPath();
       ctx.moveTo(150, 20);
       ctx.lineTo(150, 120);
@@ -73,29 +82,40 @@ const initCanvas = (canvasDom, value) => {
       console.log(newDrawType, writeText);
       drawType = newDrawType;
       ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
-      ctx.font = `30px serif`;
+      ctx.font = `30px 微软雅黑`;
       ctx.fillText(writeText, canvasEle.x0, canvasEle.y0);
     };
 
-    //修改文本字体大小
-    const changeTextSize = (newDrawType, writeText, fontSize) => {
-      console.log(newDrawType, writeText, fontSize);
+    //修改文本字体
+    const changeTextSize = (
+      newDrawType,
+      writeText,
+      fontSize,
+      wordType,
+      textValue,
+      textQi
+    ) => {
       drawType = newDrawType;
       ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
-      ctx.font = `${fontSize}px serif`;
+      ctx.font = `${fontSize}px ${wordType}`;
+      ctx.textAlign = textValue;
+      ctx.direction = textQi;
       ctx.fillText(writeText, canvasEle.x0, canvasEle.y0);
     };
 
     //引入图片
     const liImage = (newDrawType, imgUrl, cWidth, cHeight, x, y) => {
+      // ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
       drawType = newDrawType;
       const img = new Image();
+      img.crossOrigin = "anonymous";
       img.src = imgUrl;
       img.onload = () => {
         ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
         ctx.save();
         ctx.beginPath();
-        ctx.rect(x*10, y*10, cWidth * 10, cHeight * 10);
+        ctx.rect(x * 10, y * 10, cWidth * 10, cHeight * 10);
+        ctx.lineWidth = 1;
         ctx.stroke();
         ctx.closePath();
         ctx.clip();
@@ -105,15 +125,31 @@ const initCanvas = (canvasDom, value) => {
       // https://cdn1.mihuiai.com/media/images/5ee5fd5a-f112-4b6b-b742-d58efeaa0775_thumb.png
     };
 
-    //二次贝塞尔曲线
-    const drawCurveTo = (newDrawType) => {
+    //获取像素点
+    const pick = (event, divDom) => {
+      const x = event.clientX;
+      const y = event.clientY;
+      const pixel = ctx.getImageData(x, y, 1, 1);
+      const data = pixel.data;
+      const rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`;
+      divDom.style.background = rgba;
+    };
+
+    //贝塞尔曲线
+    const drawCurveTo = (newDrawType, lineWidthValue) => {
+      drawType = newDrawType;
       ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
       ctx.beginPath();
-      ctx.moveTo(canvasDom.x0 - 50, canvasDom.y0 - 50);
+      console.log(drawType, lineWidthValue);
+      ctx.lineWidth = lineWidthValue;
+      ctx.moveTo(75, 25);
       if (newDrawType === "二次") {
-        ctx.quadraticCurveTo(221, 92, 300, 100);
+        ctx.quadraticCurveTo(25, 25, 25, 62.5);
+        ctx.quadraticCurveTo(25, 100, 50, 100);
+        ctx.quadraticCurveTo(50, 120, 30, 125);
       } else if (newDrawType === "三次") {
         ctx.bezierCurveTo(75, 37, 70, 25, 50, 25);
+        ctx.bezierCurveTo(20, 25, 20, 62.5, 20, 62.5);
       }
       ctx.stroke();
     };
@@ -343,6 +379,89 @@ const initCanvas = (canvasDom, value) => {
     const clear = () => {
       ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
     };
+    //添加蒙版
+    const compositeOperation = (type, drawType) => {
+      console.log(drawType, 111);
+      ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+      ctx.globalCompositeOperation = type;
+      if (drawType === "矩形") {
+        ctx.fillStyle = canvasEle.fillStyle;
+        ctx.beginPath();
+        ctx.fillRect(
+          canvasEle.x0 - 50,
+          canvasEle.y0 - 50,
+          canvasEle.rectangleWidth,
+          canvasEle.rectangleHeight
+        );
+        ctx.fill();
+        ctx.font = `30px serif`;
+        ctx.fillText("蒙版引入", canvasEle.x0, canvasEle.y0);
+      }
+      if (drawType === "圆形") {
+        ctx.fillStyle = canvasEle.fillStyle;
+        ctx.beginPath();
+        ctx.arc(canvasEle.x0, canvasEle.y0, canvasEle.r, 0, 2 * Math.PI, true);
+        ctx.fill();
+        ctx.font = `30px serif`;
+        ctx.fillText("蒙版引入", canvasEle.x0, canvasEle.y0);
+      }
+      if (drawType === "三角形") {
+        ctx.fillStyle = canvasEle.fillStyle;
+        ctx.beginPath();
+        ctx.moveTo(150, 20);
+        ctx.lineTo(150, 120);
+        ctx.lineTo(250, 20);
+        ctx.fill();
+        ctx.font = `30px serif`;
+        ctx.fillText("蒙版引入", canvasEle.x0, canvasEle.y0);
+      }
+    };
+    //渐变函数
+    const Gradient = (drawType, value2, colorText) => {
+      const arr = [];
+      arr.push(colorText.split("-"));
+      const scale = value2 / 50;
+      //矩形
+      if (drawType === "矩形" && arr[0].length === 3) {
+        ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+        const gradient = ctx.createLinearGradient(
+          canvasEle.x0 - 50,
+          0,
+          canvasEle.x0 - 50 + canvasEle.rectangleWidth * scale,
+          0
+        );
+        gradient.addColorStop(0, arr[0][0]);
+        gradient.addColorStop(0.5, arr[0][1]);
+        gradient.addColorStop(1, arr[0][2]);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(
+          canvasEle.x0 - 50,
+          canvasEle.y0 - 50,
+          canvasEle.rectangleWidth * scale,
+          canvasEle.rectangleHeight * scale
+        );
+      }
+      if (drawType === "圆形" && arr[0].length === 2) {
+        ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+        const gradient = ctx.createRadialGradient(
+          canvasEle.x0,
+          canvasEle.y0,
+          canvasEle.r * scale,
+          canvasEle.x0,
+          canvasEle.y0,
+          0
+        );
+        gradient.addColorStop(0, arr[0][0]);
+        gradient.addColorStop(1, arr[0][1]);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(
+          canvasEle.x0 - 50,
+          canvasEle.y0 - 50,
+          canvasEle.rectangleWidth * scale,
+          canvasEle.rectangleHeight * scale
+        );
+      }
+    };
     return {
       drawCircle,
       drawRectangle,
@@ -358,13 +477,14 @@ const initCanvas = (canvasDom, value) => {
       changeTextSize,
       liImage,
       drawCurveTo,
+      pick,
+      compositeOperation,
+      Gradient,
     };
   }
 };
 
-/**
- * 点击事件更改绘制
- */
+//  点击事件更改绘制
 const btnDrawFun = (drawType, canvasDom) => {
   if (drawType === "矩形") {
     initCanvas(canvasDom).drawRectangle(drawType);
@@ -380,14 +500,11 @@ const btnDrawFun = (drawType, canvasDom) => {
 //导航栏
 function NavigationBar(props) {
   const { canvasDom, getWriteText, writeText } = props;
-  const [imgUrl, setImgUrl] = useState(
-    "https://cdn1.mihuiai.com/media/images/c209222b-472d-45a1-8596-f461ee99bc42_thumb.png"
-  );
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
-  const [cWidth, setCWidth] = useState(500);
-  const [cHeight, setCHeight] = useState(500);
-
+  const [cWidth, setCWidth] = useState(100);
+  const [cHeight, setCHeight] = useState(50);
+  const [imgUrl, setImgUrl] = useState(null);
   return (
     <div className="navigationBar">
       <ul className="bar">
@@ -411,7 +528,6 @@ function NavigationBar(props) {
             提交
           </button>
         </li>
-
         <li>
           贝塞尔曲线
           <div>
@@ -435,28 +551,34 @@ function NavigationBar(props) {
             type="text"
             placeholder="输入图片地址"
             onChange={(e) => {
+              initCanvas(canvasDom).liImage(
+                "图片",
+                e.target.value,
+                100,
+                50,
+                0,
+                0
+              );
               setImgUrl(e.target.value);
             }}
           />
-          <button
-            type="submit"
-            onClick={() => initCanvas(canvasDom).liImage("图片", imgUrl)}
-          >
-            提交
-          </button>
           <div>
-            切片X{" "}
+            切片X
             <span>
               <input
                 type="range"
                 onChange={(e) => {
-                  setCWidth(e.target.value);
-                  initCanvas(canvasDom).liImage(
-                    "图片",
-                    imgUrl,
-                    e.target.value,
-                    cHeight
-                  );
+                  if (imgUrl) {
+                    initCanvas(canvasDom).liImage(
+                      "图片",
+                      imgUrl,
+                      e.target.value,
+                      cHeight,
+                      x,
+                      y
+                    );
+                    setCWidth(e.target.value);
+                  }
                 }}
               />
             </span>
@@ -467,12 +589,14 @@ function NavigationBar(props) {
               <input
                 type="range"
                 onChange={(e) => {
-                  setCHeight(e.target.value);
+                  if (imgUrl) setCHeight(e.target.value);
                   initCanvas(canvasDom).liImage(
                     "图片",
                     imgUrl,
                     cWidth,
-                    e.target.value
+                    e.target.value,
+                    x,
+                    y
                   );
                 }}
               />
@@ -484,15 +608,17 @@ function NavigationBar(props) {
               <input
                 type="range"
                 onChange={(e) => {
-                  setX(e.target.value);
-                  initCanvas(canvasDom).liImage(
-                    "图片",
-                    imgUrl,
-                    cWidth,
-                    cHeight,
-                    e.target.value,
-                    y
-                  );
+                  if (imgUrl) {
+                    setX(e.target.value);
+                    initCanvas(canvasDom).liImage(
+                      "图片",
+                      imgUrl,
+                      cWidth,
+                      cHeight,
+                      e.target.value,
+                      y
+                    );
+                  }
                 }}
               />
             </span>
@@ -503,15 +629,17 @@ function NavigationBar(props) {
               <input
                 type="range"
                 onChange={(e) => {
-                  setY(e.target.value);
-                  initCanvas(canvasDom).liImage(
-                    "图片",
-                    imgUrl,
-                    cWidth,
-                    cHeight,
-                    x,
-                    e.target.value
-                  );
+                  if (imgUrl) {
+                    setY(e.target.value);
+                    initCanvas(canvasDom).liImage(
+                      "图片",
+                      imgUrl,
+                      cWidth,
+                      cHeight,
+                      x,
+                      e.target.value
+                    );
+                  }
                 }}
               />
             </span>
@@ -531,17 +659,61 @@ function Control(props) {
   const [value5, setValue5] = useState(0);
   const [valueX, setValueX] = useState(0);
   const [valueY, setValueY] = useState(0);
+  const [textValue, setTextValue] = useState("微软雅黑");
   const [valueColor, setValueColor] = useState(null);
   const [fontSize, setFontSize] = useState(null);
   const [lineWidthValue, setLineWidthValue] = useState(0);
+  const [textQi, setTextQi] = useState("start");
+  const [lineStyle, setLineStyle] = useState("bevel");
+  const [lineDashA, setLineDashA] = useState(0);
+  const [lineDashB, setLineDashB] = useState(0);
+  const [lineDashOffset, setLineDashOffset] = useState(0);
   const selectRef = React.useRef(null);
+  const selectMenRef = React.useRef(null);
   const { canvasDom, writeText } = props;
 
   return (
     <div id="control">
       <div>操作界面</div>
       <div>
-        <button onClick={() => initCanvas(canvasDom).clear()}>清空画布</button>
+        <button onClick={() => initCanvas(canvasDom).clear()}>清空画布</button>{" "}
+        {/* 蒙版 */}
+        <span>
+          蒙版
+          <select
+            ref={selectMenRef}
+            onChange={(e) =>
+              initCanvas(canvasDom).compositeOperation(e.target.value, drawType)
+            }
+          >
+            <option value="source-over">source-over</option>
+            <option value="source-in">source-in</option>
+            <option value="source-out">source-out</option>
+            <option value="source-atop">source-atop</option>
+            <option value="destination-over">destination-over</option>
+            <option value="destination-in">destination-in</option>
+            <option value="destination-out">destination-out</option>
+            <option value="destination-atop">destination-atop</option>
+            <option value="lighter">lighter</option>
+            <option value="copy">copy</option>
+            <option value="xor">xor</option>
+            <option value="multiply">multiply</option>
+            <option value="screen">screen</option>
+            <option value="overlay">overlay</option>
+            <option value="darken">darken</option>
+            <option value="lighten">lighten</option>
+            <option value="color-dodge">color-dodge</option>
+            <option value="color-burn">color-burn</option>
+            <option value="hard-light">hard-light</option>
+            <option value="soft-light">soft-light</option>
+            <option value="difference">difference</option>
+            <option value="exclusion">exclusion</option>
+            <option value="hue">hue</option>
+            <option value="saturation">saturation</option>
+            <option value="color">color</option>
+            <option value="luminosity">luminosity</option>
+          </select>
+        </span>
       </div>
       {/* 颜色 */}
       <span>
@@ -591,6 +763,17 @@ function Control(props) {
             initCanvas(canvasDom).rotateImage(e.target.value, value2);
           }}
         />
+      </span>
+      {/* 渐变 */}
+      <span>
+        渐变{" "}
+        <input
+          type="text"
+          placeholder="颜色-颜色(圆)-颜色(矩）"
+          onChange={(e) => {
+            initCanvas(canvasDom).Gradient(drawType, value2, e.target.value);
+          }}
+        />{" "}
       </span>
       {/* 阴影 */}
       <div>
@@ -650,10 +833,10 @@ function Control(props) {
           }}
         />
       </div>
-      {/* 字体大小 */}
+      {/* 字体 */}
       <div>
         字号
-        <input type="text" onChange={(e) => setFontSize(e.target.value)} />{" "}
+        <input type="text" onChange={(e) => setFontSize(e.target.value)} />
         <button
           type="submit"
           onClick={() =>
@@ -662,6 +845,56 @@ function Control(props) {
         >
           提交
         </button>
+        字体
+        <select
+          onChange={(e) => {
+            (e) => setTextValue(e.target.value);
+            initCanvas(canvasDom).changeTextSize(
+              "文本",
+              writeText,
+              fontSize,
+              e.target.value
+            );
+          }}
+        >
+          <option value="微软雅黑">微软雅黑</option>
+          <option value="楷体">楷体</option>
+        </select>
+        对齐方式
+        <select
+          onChange={(e) => {
+            setTextQi(e.target.value);
+            initCanvas(canvasDom).changeTextSize(
+              "文本",
+              writeText,
+              fontSize,
+              textValue,
+              e.target.value
+            );
+          }}
+        >
+          <option value="start">start</option>
+          <option value="end">end</option>
+          <option value="left">left</option>
+          <option value="right ">right </option>
+          <option value="center">center</option>
+        </select>
+        文本方向
+        <select
+          onChange={(e) =>
+            initCanvas(canvasDom).changeTextSize(
+              "文本",
+              writeText,
+              fontSize,
+              textValue,
+              textQi,
+              e.target.value
+            )
+          }
+        >
+          <option value="ltr">从左向右</option>
+          <option value="rtl">从右向左</option>
+        </select>
       </div>
       {/* 线条 */}
       <div>
@@ -672,7 +905,13 @@ function Control(props) {
             type="range"
             onChange={(e) => {
               setLineWidthValue(e.target.value);
-              initCanvas(canvasDom).drawLine("直线", lineWidthValue);
+              if (drawType === "直线") {
+                initCanvas(canvasDom).drawLine(drawType, lineWidthValue);
+              } else if (drawType === "二次") {
+                initCanvas(canvasDom).drawCurveTo("二次", lineWidthValue);
+              } else if (drawType === "三次") {
+                initCanvas(canvasDom).drawCurveTo("三次", lineWidthValue);
+              }
             }}
           />
         </span>
@@ -683,7 +922,9 @@ function Control(props) {
             ref={selectRef}
             onChange={(e) => {
               const checked = e.target.value;
-              initCanvas(canvasDom).drawLine("直线", lineWidthValue, checked);
+              if (drawType === "直线") {
+                initCanvas(canvasDom).drawLine("直线", lineWidthValue, checked);
+              }
             }}
           >
             <option value="butt">方形</option>
@@ -696,12 +937,15 @@ function Control(props) {
           <select
             ref={selectRef}
             onChange={(e) => {
-              initCanvas(canvasDom).drawLine(
-                "直线",
-                lineWidthValue,
-                null,
-                e.target.value
-              );
+              setLineStyle(e.target.value);
+              if (drawType === "直线") {
+                initCanvas(canvasDom).drawLine(
+                  "直线",
+                  lineWidthValue,
+                  null,
+                  e.target.value
+                );
+              }
             }}
           >
             <option value="bevel">bevel</option>
@@ -710,31 +954,59 @@ function Control(props) {
           </select>
         </span>
         <span>
-          虚线{" "}
+          绘制虚线
           <input
             type="text"
-            placeholder="输入实线部分宽度"
+            placeholder="实线长"
             onChange={(e) => {
-              initCanvas(canvasDom).drawLine(
-                "直线",
-                lineWidthValue,
-                null,
-                null,
-                e.target.value
-              );
+              setLineDashA(e.target.value);
+              if (drawType === "直线") {
+                initCanvas(canvasDom).drawLine(
+                  "直线",
+                  lineWidthValue,
+                  null,
+                  lineStyle,
+                  e.target.value,
+                  lineDashB,
+                  lineDashOffset
+                );
+              }
             }}
-          />{" "}
+          />
           <input
             type="text"
-            placeholder="输入虚线部分宽度"
+            placeholder="虚线长"
             onChange={(e) => {
-              initCanvas(canvasDom).drawLine(
-                "直线",
-                lineWidthValue,
-                null,
-                null,
-                e.target.value
-              );
+              if (drawType === "直线") {
+                setLineDashB(e.target.value);
+                initCanvas(canvasDom).drawLine(
+                  "直线",
+                  lineWidthValue,
+                  null,
+                  lineStyle,
+                  lineDashA,
+                  e.target.value,
+                  lineDashOffset
+                );
+              }
+            }}
+          />
+          <input
+            type="text"
+            placeholder="起始位置"
+            onChange={(e) => {
+              if (drawType === "直线") {
+                setLineDashOffset(e.target.value);
+                initCanvas(canvasDom).drawLine(
+                  "直线",
+                  lineWidthValue,
+                  null,
+                  lineStyle,
+                  lineDashA,
+                  lineDashB,
+                  e.target.value
+                );
+              }
             }}
           />
         </span>
@@ -745,6 +1017,7 @@ function Control(props) {
 
 //画布页面
 function Canvas(props) {
+  const { divHoveredDom, divSelectedDom } = props;
   const { canvasWidth = 1000, canvasHeight = 500, getCanvasDom } = props;
   const canvasRef = React.useRef(null);
   useEffect(() => {
@@ -756,7 +1029,34 @@ function Canvas(props) {
       ref={canvasRef}
       width={canvasWidth}
       height={canvasHeight}
+      onClick={(e) => initCanvas(canvasRef.current).pick(e, divHoveredDom)}
+      onMouseMove={(e) => initCanvas(canvasRef.current).pick(e, divSelectedDom)}
     ></canvas>
+  );
+}
+
+function ColorChoose(props) {
+  const { getDivHoveredDom, getDivSelectedDom } = props;
+  const divHoveredRef = React.useRef(null);
+  const divSelectedRef = React.useRef(null);
+  useEffect(() => {
+    getDivHoveredDom(divHoveredRef.current);
+  }, [props]);
+  useEffect(() => {
+    getDivSelectedDom(divSelectedRef.current);
+  }, [props]);
+  return (
+    <div className="color-choose">
+      颜色选择器组件
+      <div>
+        <div id="hovered-color" ref={divHoveredRef}>
+          点击获取
+        </div>
+        <div id="selected-color" ref={divSelectedRef}>
+          实时获取
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -764,6 +1064,8 @@ function App() {
   const [canvasDom, setCanvasDom] = useState(null);
   const [drawType, setDrawType] = useState(null);
   const [writeText, setwriteText] = useState(null);
+  const [divHoveredDom, setDivHoveredDom] = useState(null);
+  const [divSelectedDom, setDivSelectedDom] = useState(null);
   return (
     <div>
       <NavigationBar
@@ -777,7 +1079,15 @@ function App() {
         drawType={drawType}
         writeText={writeText}
       ></Control>
-      <Canvas getCanvasDom={(dom) => setCanvasDom(dom)}></Canvas>
+      <Canvas
+        getCanvasDom={(dom) => setCanvasDom(dom)}
+        divHoveredDom={divHoveredDom}
+        divSelectedDom={divSelectedDom}
+      ></Canvas>
+      <ColorChoose
+        getDivHoveredDom={(dom) => setDivHoveredDom(dom)}
+        getDivSelectedDom={(dom) => setDivSelectedDom(dom)}
+      ></ColorChoose>
     </div>
   );
 }
