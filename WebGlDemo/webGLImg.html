@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>图片操作</title>
+    <style>
+      #glcanvas {
+        float: left;
+      }
+
+      #input {
+        float: left;
+      }
+      #input2 {
+        float: left;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="glcanvas" width="800" height="800"> </canvas>
+    <input type="text" placeholder="输入边数(最大为6)" id="input" />
+    <div>
+      <span
+        ><input
+          type="range"
+          id="input2"
+          min="-1.0"
+          max="1.0"
+          step="0.01"
+        />X轴平移</span
+      >
+      <span
+        ><input
+          type="range"
+          id="input3"
+          min="-1.0"
+          max="1.0"
+          step="0.01"
+        />Y轴平移</span
+      >
+      <span
+        ><input
+          type="range"
+          id="input4"
+          min="-180"
+          max="180"
+          step="1"
+        />旋转</span
+      >
+      <span
+      ><input
+        type="range"
+        id="input5"
+        min="0.0"
+        max="2.0"
+        step="0.1"
+      />缩放</span
+    >
+    </div>
+    <script>
+      const canvas = document.getElementById("glcanvas");
+      const gl = canvas.getContext("webgl");
+      const input = document.getElementById("input");
+      const input2 = document.getElementById("input2");
+      const input3 = document.getElementById("input3");
+      const input4 = document.getElementById("input4");
+      const input5 = document.getElementById("input5");
+      //创建顶点着色器
+      const vsSource = `
+      attribute vec4 a_Position;
+      uniform mat4 mat;
+      uniform mat4 matRotate;
+      uniform mat4 matSize;
+       void main(){
+           gl_Position = mat* matRotate*matSize*a_Position;
+       }
+      `;
+      //创建片元着色器
+      const fsSource = `
+      precision mediump float;
+      void main(){
+          gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+      }`;
+
+      // 初始化着色器
+      const createShader = (gl, type, source) => {
+        //创建shader对象
+        let shader = gl.createShader(type);
+        //往shader传入源码
+        gl.shaderSource(shader, source);
+        //编译
+        gl.compileShader(shader);
+        //判断编译是否成功
+        let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+        if (success) {
+          return shader;
+        }
+        console.log(gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+      };
+
+      //初始化对象 需要传入两个着色器
+      const createProgram = (gl, vsShader, fsShader) => {
+        let program = gl.createProgram();
+        //往program中传入webglshader对象
+        gl.attachShader(program, vsShader);
+        gl.attachShader(program, fsShader);
+        //连接program对象
+        gl.linkProgram(program);
+        let success = gl.getProgramParameter(program, gl.LINK_STATUS);
+        if (success) {
+          return program;
+        }
+        console.log(gl.getProgramInfoLog(program));
+        gl.deleteProgram(program);
+      };
+
+      const initWebGL = (gl, vsSource, fsSource) => {
+        //根据源代码创建顶点着色器
+        let vsShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
+        //片元着色器
+        let fsShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+        //创建webglPorgram程序
+        let program = createProgram(gl, vsShader, fsShader);
+        return program;
+      };
+      //创建缓冲区
+      const buffer = gl.createBuffer();
+      //绑定缓冲区到目标
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      //初始化shader数据
+      const program = initWebGL(gl, vsSource, fsSource);
+      gl.useProgram(program);
+
+      let Tx = 0.0; //x坐标的位置
+      let Ty = 0.0; //y坐标的位置
+      let Tz = 0.0; //z坐标的位置
+      let Tw = 1.0; //差值
+      let Ta = 1.0; //x坐标的位置
+      let Tb = 1.0; //y坐标的位置
+      let Tc = 1.0; //z坐标的位置
+      let angle = 0; //定义初始旋转角度
+      //平移矩阵
+      const mat = new Float32Array([
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        Tx,
+        Ty,
+        Tz,
+        Tw,
+      ]);
+      //webgl中需要按照对角线进行翻转
+      //旋转矩阵
+      const matRotate = new Float32Array([
+        Math.cos(angle),
+        Math.sin(angle),
+        0.0,
+        0.0,
+        -Math.sin(angle),
+        Math.cos(angle),
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+      ]);
+      //缩放矩阵
+          // 初始化一个旋转矩阵。
+    const matSize = new Float32Array([
+      Ta,  0.0, 0.0, 0.0,
+      0.0,  Tb, 0.0, 0.0,
+      0.0, 0.0,  Tc, 0.0,
+      0.0, 0.0, 0.0, 1.0,
+    ]);
+
+      //获取矩阵的变量然后给其赋值
+      const matLocation = gl.getUniformLocation(program, "mat");
+      const mat2Location = gl.getUniformLocation(program, "matRotate");
+      const mat3Location = gl.getUniformLocation(program, "matSize");
+      const DrawStep = () => {
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(pointData),
+          gl.STATIC_DRAW
+        );
+        gl.uniformMatrix4fv(matLocation, false, mat); //用来赋值的
+        gl.uniformMatrix4fv(mat2Location, false, matRotate); 
+        gl.uniformMatrix4fv(mat3Location, false, matSize);
+        const a_Position = gl.getAttribLocation(program, "a_Position");
+        gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_Position);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, pointData.length / 2);
+      };
+
+      var r = 0.5;
+      let pointData = [];
+      input.addEventListener("input", (e) => {
+        pointData = [];
+        let n = e.target.value;
+        for (let i = 0; i < n; i++) {
+          pointData.push(
+            r * Math.sin((i * (2 * Math.PI)) / n),
+            r * Math.cos((i * (2 * Math.PI)) / n)
+          );
+        }
+        DrawStep();
+      });
+      input2.addEventListener("input", (e) => {
+        mat[12] = Number(e.target.value);
+        DrawStep();
+      });
+      input3.addEventListener("input", (e) => {
+        mat[13] = Number(e.target.value);
+        DrawStep();
+      });
+      input4.addEventListener("input", (e) => {
+        angle = Number(e.target.value) * (Math.PI / 180);
+        matRotate[0] = Math.cos(angle);
+        matRotate[1] = Math.sin(angle);
+        matRotate[4] = -Math.sin(angle);
+        matRotate[5] = Math.cos(angle);
+        DrawStep();
+      });
+      input5.addEventListener("input", (e) => {
+        matSize[0]=Number(e.target.value)
+        matSize[5]=Number(e.target.value)
+        DrawStep();
+      });
+    </script>
+  </body>
+</html>

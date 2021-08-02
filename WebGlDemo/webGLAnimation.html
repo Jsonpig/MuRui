@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas id="glcanvas" width="800" height="800"></canvas>
+    <script>
+      const canvas = document.getElementById("glcanvas");
+      const gl = canvas.getContext("webgl");
+      //创建顶点着色器
+      const vsSource = `
+         attribute vec4 a_Position;
+          uniform mat4 matMove;
+         void main (){
+           //内值变量 表示当前点的位置
+           gl_Position = matMove*a_Position;
+         }
+      `;
+      //创建片元着色器
+      const fsSource = `
+         precision mediump float;
+         void main(){
+          //vec4 四维向量 表示用来表示RGBA的值 均为浮点数 
+          gl_FragColor = vec4(0.0,0.7,1.0,1.0);
+         }
+      `;
+
+      // 初始化着色器
+      function createShader(gl, type, source) {
+        //创建shader对象
+        let shader = gl.createShader(type);
+        //往shader中传入源代码
+        gl.shaderSource(shader, source);
+        //编译shader
+        gl.compileShader(shader);
+        //判断是否编译成功
+        let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+        if (success) {
+          return shader;
+        }
+        //编译失败打印
+        console.log(gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+      }
+
+      //初始化对象
+      function createProgram(gl, vsShader, fsShader) {
+        let program = gl.createProgram();
+        //往program中传入 webglShader对象
+        gl.attachShader(program, vsShader);
+        gl.attachShader(program, fsShader);
+        //连接 program
+        gl.linkProgram(program);
+        //判断链接是否成功
+        let success = gl.getProgramParameter(program, gl.LINK_STATUS);
+        if (success) {
+          return program;
+        }
+        console.log(gl.getProgramInfoLog(program));
+        gl.deleteProgram(program);
+      }
+
+      function initWebGL(gl, vsSource, fsSource) {
+        //根据源代码创建顶点着色器
+        let vsShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
+        //根据源代码创建片元着色器
+        let fsShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+        //创建WebGLProgram 程序
+        let program = createProgram(gl, vsShader, fsShader);
+        return program;
+      }
+      //创建缓冲区
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+      //初始化shader程序
+      const program = initWebGL(gl, vsSource, fsSource);
+      //告诉WebGL使用我们刚刚初始化的这个程序
+      gl.useProgram(program);
+
+      let pointData = [];
+      const n = 5;
+      const R = 0.15,
+        r = 0.05;
+      for (let i = 0; i < 2 * n; i++) {
+        const per = Math.PI / n;
+        if (i % 2 === 0) {
+          pointData.push(r * Math.cos(i * per), r * Math.sin(i * per));
+        } else {
+          pointData.push(R * Math.cos(i * per), R * Math.sin(i * per));
+        }
+      }
+
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(pointData),
+        gl.STATIC_DRAW
+      );
+      let Tx = 0.0,
+        Ty = 0.0,
+        Tz = 0.0,
+        Tw = 1.0;
+
+      const move = () => {        
+        Tx += 0.005
+        Ty += 0.005
+        Tz += 0.01
+        const matMove = new Float32Array([
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          Tx,
+          Ty,
+          Tz,
+          1.0,
+        ]);
+        const matLocation = gl.getUniformLocation(program, "matMove");
+        gl.uniformMatrix4fv(matLocation, false, matMove); //用来赋值的
+        //获取shder中a_Position中的地址
+        const a_Position = gl.getAttribLocation(program, "a_Position");
+
+        gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_Position);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 10);
+        requestAnimationFrame(move)
+      };
+      move()
+
+
+    </script>
+  </body>
+</html>
