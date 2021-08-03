@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import  { initCanvas }   from "../Tools/All";
+import { initCanvas } from "../Tools/All";
 //画布页面
 function Canvas(props) {
   const { divHoveredDom, divSelectedDom } = props;
@@ -120,7 +120,386 @@ function Canvas(props) {
           }
         }}
         onMouseMove={(e) => {
+          const { left, top } = canvasRef.current.getBoundingClientRect();
+          let eX = e.clientX - left; //在画布上点击的坐标
+          let eY = e.clientY - top;
+          let OldX = changeOldX.current;
+          let OldY = changeOldY.current;
+          const JudgePoint = (point) => {
+            const touch = [eX, eY];
+            const pointArr = []; //接收传入进来的数组
+            point.forEach((item) => {
+              pointArr.push([
+                (item[0] - OldX - 100) * Math.cos(angle) -
+                  (item[1] - OldY - 100) * Math.sin(angle) +
+                  changeX.current +
+                  100,
+                (item[0] - OldX - 100) * Math.sin(angle) +
+                  (item[1] - OldY - 100) * Math.cos(angle) +
+                  changeY.current +
+                  100,
+              ]);
+            });
+            // console.log(pointArr);
+
+            return initCanvas(
+              canvasRef.current,
+              canvas2Ref.current
+            ).isPointInImage(touch, pointArr);
+          };
           initCanvas(canvasRef.current).pick(e, divSelectedDom);
+          if (
+            JudgePoint([
+              [OldX + 194, OldY - 6],
+              [OldX + 206, OldY - 6],
+              [OldX + 206, OldY + 6],
+              [OldX + 194, OldY + 6],
+            ])
+          ) {
+            if (angle <= Math.PI / 6) {
+              canvasRef.current.style = "cursor:ne-resize";
+            } else if (angle > Math.PI / 6 && angle <= Math.PI / 3) {
+              canvasRef.current.style = "cursor:e-resize";
+            } else if (angle > Math.PI / 3 && angle <= (2 * Math.PI) / 3) {
+              canvasRef.current.style = "cursor:se-resize";
+            } else if (
+              angle > (2 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:s-resize";
+            } else if (
+              angle > (5 * Math.PI) / 6 &&
+              angle <= (7 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:sw-resize";
+            } else if (
+              angle > (7 * Math.PI) / 6 &&
+              angle <= (4 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:w-resize";
+            } else if (
+              angle > (4 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:nw-resize";
+            } else if (
+              angle > (5 * Math.PI) / 3 &&
+              angle <= (11 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:n-resize";
+            } else {
+              canvasRef.current.style = "cursor:ne-resize";
+            }
+          } else if (
+            JudgePoint([
+              [OldX - 6, OldY - 6],
+              [OldX + 6, OldY - 6],
+              [OldX + 6, OldY + 6],
+              [OldX - 6, OldY + 6],
+            ])
+          ) {
+            if (angle <= Math.PI / 6) {
+              canvasRef.current.style = "cursor:nw-resize";
+            } else if (angle > Math.PI / 6 && angle <= Math.PI / 3) {
+              canvasRef.current.style = "cursor:n-resize";
+            } else if (angle > Math.PI / 3 && angle <= (2 * Math.PI) / 3) {
+              canvasRef.current.style = "cursor:ne-resize";
+            } else if (
+              angle > (2 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:e-resize";
+            } else if (
+              angle > (5 * Math.PI) / 6 &&
+              angle <= (7 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:se-resize";
+            } else if (
+              angle > (7 * Math.PI) / 6 &&
+              angle <= (4 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:s-resize";
+            } else if (
+              angle > (4 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:sw-resize";
+            } else if (
+              angle > (5 * Math.PI) / 3 &&
+              angle <= (11 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:w-resize";
+            } else {
+              canvasRef.current.style = "cursor:nw-resize";
+            }
+          } else if (
+            JudgePoint([
+              [OldX + 94, OldY - 6],
+              [OldX + 106, OldY - 6],
+              [OldX + 106, OldY + 6],
+              [OldX + 94, OldY + 6],
+            ])
+          ) {
+            if (angle <= Math.PI / 6) {
+              canvasRef.current.style = "cursor:n-resize";
+            } else if (angle > Math.PI / 6 && angle <= Math.PI / 3) {
+              canvasRef.current.style = "cursor:ne-resize";
+            } else if (angle > Math.PI / 3 && angle <= (2 * Math.PI) / 3) {
+              canvasRef.current.style = "cursor:e-resize";
+            } else if (
+              angle > (2 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:se-resize";
+            } else if (
+              angle > (5 * Math.PI) / 6 &&
+              angle <= (7 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:s-resize";
+            } else if (
+              angle > (7 * Math.PI) / 6 &&
+              angle <= (4 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:sw-resize";
+            } else if (
+              angle > (4 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:w-resize";
+            } else if (
+              angle > (5 * Math.PI) / 3 &&
+              angle <= (11 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:nw-resize";
+            } else {
+              canvasRef.current.style = "cursor:n-resize";
+            }
+          } else if (
+            JudgePoint([
+              [OldX - 6, OldY + 94],
+              [OldX + 6, OldY + 94],
+              [OldX + 6, OldY + 106],
+              [OldX - 6, OldY + 106],
+            ])
+          ) {
+            if (angle <= Math.PI / 6) {
+              canvasRef.current.style = "cursor:w-resize";
+            } else if (angle > Math.PI / 6 && angle <= Math.PI / 3) {
+              canvasRef.current.style = "cursor:nw-resize";
+            } else if (angle > Math.PI / 3 && angle <= (2 * Math.PI) / 3) {
+              canvasRef.current.style = "cursor:n-resize";
+            } else if (
+              angle > (2 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:ne-resize";
+            } else if (
+              angle > (5 * Math.PI) / 6 &&
+              angle <= (7 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:e-resize";
+            } else if (
+              angle > (7 * Math.PI) / 6 &&
+              angle <= (4 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:se-resize";
+            } else if (
+              angle > (4 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:s-resize";
+            } else if (
+              angle > (5 * Math.PI) / 3 &&
+              angle <= (11 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:sw-resize";
+            } else {
+              canvasRef.current.style = "cursor:w-resize";
+            }
+          } else if (
+            JudgePoint([
+              [OldX + 194, OldY + 94],
+              [OldX + 206, OldY + 94],
+              [OldX + 206, OldY + 106],
+              [OldX + 194, OldY + 106],
+            ])
+          ) {
+            if (angle <= Math.PI / 6) {
+              canvasRef.current.style = "cursor:e-resize";
+            } else if (angle > Math.PI / 6 && angle <= Math.PI / 3) {
+              canvasRef.current.style = "cursor:se-resize";
+            } else if (angle > Math.PI / 3 && angle <= (2 * Math.PI) / 3) {
+              canvasRef.current.style = "cursor:s-resize";
+            } else if (
+              angle > (2 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:sw-resize";
+            } else if (
+              angle > (5 * Math.PI) / 6 &&
+              angle <= (7 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:w-resize";
+            } else if (
+              angle > (7 * Math.PI) / 6 &&
+              angle <= (4 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:nw-resize";
+            } else if (
+              angle > (4 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:n-resize";
+            } else if (
+              angle > (5 * Math.PI) / 3 &&
+              angle <= (11 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:ne-resize";
+            } else {
+              canvasRef.current.style = "cursor:e-resize";
+            }
+          } else if (
+            JudgePoint([
+              [OldX - 6, OldY + 194],
+              [OldX + 6, OldY + 194],
+              [OldX + 6, OldY + 206],
+              [OldX - 6, OldY + 206],
+            ])
+          ) {
+            if (angle <= Math.PI / 6) {
+              canvasRef.current.style = "cursor:sw-resize";
+            } else if (angle > Math.PI / 6 && angle <= Math.PI / 3) {
+              canvasRef.current.style = "cursor:w-resize";
+            } else if (angle > Math.PI / 3 && angle <= (2 * Math.PI) / 3) {
+              canvasRef.current.style = "cursor:nw-resize";
+            } else if (
+              angle > (2 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:n-resize";
+            } else if (
+              angle > (5 * Math.PI) / 6 &&
+              angle <= (7 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:ne-resize";
+            } else if (
+              angle > (7 * Math.PI) / 6 &&
+              angle <= (4 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:e-resize";
+            } else if (
+              angle > (4 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:se-resize";
+            } else if (
+              angle > (5 * Math.PI) / 3 &&
+              angle <= (11 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:s-resize";
+            } else {
+              canvasRef.current.style = "cursor:sw-resize";
+            }
+          } else if (
+            JudgePoint([
+              [OldX + 94, OldY + 194],
+              [OldX + 106, OldY + 194],
+              [OldX + 106, OldY + 206],
+              [OldX + 94, OldY + 206],
+            ])
+          ) {
+            if (angle <= Math.PI / 6) {
+              canvasRef.current.style = "cursor:s-resize";
+            } else if (angle > Math.PI / 6 && angle <= Math.PI / 3) {
+              canvasRef.current.style = "cursor:sw-resize";
+            } else if (angle > Math.PI / 3 && angle <= (2 * Math.PI) / 3) {
+              canvasRef.current.style = "cursor:w-resize";
+            } else if (
+              angle > (2 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:nw-resize";
+            } else if (
+              angle > (5 * Math.PI) / 6 &&
+              angle <= (7 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:n-resize";
+            } else if (
+              angle > (7 * Math.PI) / 6 &&
+              angle <= (4 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:ne-resize";
+            } else if (
+              angle > (4 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:e-resize";
+            } else if (
+              angle > (5 * Math.PI) / 3 &&
+              angle <= (11 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:se-resize";
+            } else {
+              canvasRef.current.style = "cursor:s-resize";
+            }
+          } else if (
+            JudgePoint([
+              [OldX + 194, OldY + 194],
+              [OldX + 206, OldY + 194],
+              [OldX + 206, OldY + 206],
+              [OldX + 194, OldY + 206],
+            ])
+          ) {
+            if (angle <= Math.PI / 6) {
+              canvasRef.current.style = "cursor:se-resize";
+            } else if (angle > Math.PI / 6 && angle <= Math.PI / 3) {
+              canvasRef.current.style = "cursor:s-resize";
+            } else if (angle > Math.PI / 3 && angle <= (2 * Math.PI) / 3) {
+              canvasRef.current.style = "cursor:sw-resize";
+            } else if (
+              angle > (2 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:w-resize";
+            } else if (
+              angle > (5 * Math.PI) / 6 &&
+              angle <= (7 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:nw-resize";
+            } else if (
+              angle > (7 * Math.PI) / 6 &&
+              angle <= (4 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:n-resize";
+            } else if (
+              angle > (4 * Math.PI) / 3 &&
+              angle <= (5 * Math.PI) / 3
+            ) {
+              canvasRef.current.style = "cursor:ne-resize";
+            } else if (
+              angle > (5 * Math.PI) / 3 &&
+              angle <= (11 * Math.PI) / 6
+            ) {
+              canvasRef.current.style = "cursor:e-resize";
+            } else {
+              canvasRef.current.style = "cursor:se-resize";
+            }
+          } else if (
+            JudgePoint([
+              [
+                // 计算旋转之后锁定区域的坐标
+                OldX - 6,
+                OldY - 6,
+              ],
+              [OldX + 196, OldY - 6],
+              [OldX + 196, OldY + 196],
+              [OldX - 6, OldY + 196],
+            ])
+          ) {
+            canvasRef.current.style = "cursor:move";
+          } else {
+            canvasRef.current.style = "cursor:default";
+          }
         }}
         //鼠标点击下去
         onMouseDown={(e) => {
@@ -203,105 +582,6 @@ function Canvas(props) {
               ]
             )
           ) {
-            canvasRef.current.style = "cursor:move";
-            if (
-              initCanvas(canvasRef.current, canvas2Ref.current).isPointInImage(
-                [eX, eY],
-                [
-                  [changeOldX.current + 194, changeOldY.current - 6],
-                  [changeOldX.current + 206, changeOldY.current - 6],
-                  [changeOldX.current + 206, changeOldY.current + 6],
-                  [changeOldX.current + 194, changeOldY.current + 6],
-                ]
-              )
-            ) {
-              canvasRef.current.style = "cursor:ne-resize";
-            } else if (
-              initCanvas(canvasRef.current, canvas2Ref.current).isPointInImage(
-                [eX, eY],
-                [
-                  [changeOldX.current - 4, changeOldY.current - 6],
-                  [changeOldX.current + 6, changeOldY.current - 6],
-                  [changeOldX.current + 6, changeOldY.current + 6],
-                  [changeOldX.current - 6, changeOldY.current + 6],
-                ]
-              )
-            ) {
-              canvasRef.current.style = "cursor:nw-resize";
-            } else if (
-              initCanvas(canvasRef.current, canvas2Ref.current).isPointInImage(
-                [eX, eY],
-                [
-                  [changeOldX.current + 94, changeOldY.current - 6],
-                  [changeOldX.current + 106, changeOldY.current - 6],
-                  [changeOldX.current + 106, changeOldY.current + 6],
-                  [changeOldX.current + 94, changeOldY.current + 6],
-                ]
-              )
-            ) {
-              canvasRef.current.style = "cursor:n-resize";
-            } else if (
-              initCanvas(canvasRef.current, canvas2Ref.current).isPointInImage(
-                [eX, eY],
-                [
-                  [changeOldX.current - 6, changeOldY.current + 94],
-                  [changeOldX.current + 6, changeOldY.current + 94],
-                  [changeOldX.current + 6, changeOldY.current + 106],
-                  [changeOldX.current - 6, changeOldY.current + 106],
-                ]
-              )
-            ) {
-              canvasRef.current.style = "cursor:w-resize";
-            } else if (
-              initCanvas(canvasRef.current, canvas2Ref.current).isPointInImage(
-                [eX, eY],
-                [
-                  [changeOldX.current + 194, changeOldY.current + 94],
-                  [changeOldX.current + 206, changeOldY.current + 94],
-                  [changeOldX.current + 205, changeOldY.current + 106],
-                  [changeOldX.current + 194, changeOldY.current + 106],
-                ]
-              )
-            ) {
-              canvasRef.current.style = "cursor:e-resize";
-            } else if (
-              initCanvas(canvasRef.current, canvas2Ref.current).isPointInImage(
-                [eX, eY],
-                [
-                  [changeOldX.current - 6, changeOldY.current + 194],
-                  [changeOldX.current + 6, changeOldY.current + 194],
-                  [changeOldX.current + 6, changeOldY.current + 206],
-                  [changeOldX.current - 6, changeOldY.current + 206],
-                ]
-              )
-            ) {
-              canvasRef.current.style = "cursor:sw-resize";
-            } else if (
-              initCanvas(canvasRef.current, canvas2Ref.current).isPointInImage(
-                [eX, eY],
-                [
-                  [changeOldX.current + 94, changeOldY.current + 194],
-                  [changeOldX.current + 106, changeOldY.current + 194],
-                  [changeOldX.current + 106, changeOldY.current + 206],
-                  [changeOldX.current + 94, changeOldY.current + 206],
-                ]
-              )
-            ) {
-              canvasRef.current.style = "cursor:s-resize";
-            } else if (
-              initCanvas(canvasRef.current, canvas2Ref.current).isPointInImage(
-                [eX, eY],
-                [
-                  [changeOldX.current + 194, changeOldY.current + 194],
-                  [changeOldX.current + 206, changeOldY.current + 194],
-                  [changeOldX.current + 206, changeOldY.current + 206],
-                  [changeOldX.current + 194, changeOldY.current + 206],
-                ]
-              )
-            ) {
-              canvasRef.current.style = "cursor:se-resize";
-            }
-
             initCanvas(canvasRef.current, canvas2Ref.current).rotateImage(
               rotateValue,
               50,
@@ -327,7 +607,7 @@ function Canvas(props) {
                 changeOldX.current = changeX.current;
                 changeOldY.current = changeY.current;
                 initCanvas(canvasRef.current, canvas2Ref.current).clear2();
-                canvasRef.current.style = "cursor:default";
+                // canvasRef.current.style = "cursor:default";
                 canvasRef.current.onmousemove = null;
               };
             };
@@ -338,5 +618,4 @@ function Canvas(props) {
   );
 }
 
-
-export default Canvas
+export default Canvas;

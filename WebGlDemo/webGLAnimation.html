@@ -14,21 +14,29 @@
       //创建顶点着色器
       const vsSource = `
          attribute vec4 a_Position;
+         attribute vec2 a_texCoord;
+         varying vec2 v_texCoord;
           uniform mat4 matMove;
+          uniform mat4 matRotate;
+          uniform mat4 matSize;
          void main (){
            //内值变量 表示当前点的位置
-           gl_Position = matMove*a_Position;
+           gl_Position = matSize*matMove*matRotate*a_Position;
+           v_texCoord = a_texCoord;
          }
       `;
       //创建片元着色器
       const fsSource = `
          precision mediump float;
+         varying vec2 v_texCoord;
+         uniform sampler2D u_texture;
          void main(){
-          //vec4 四维向量 表示用来表示RGBA的值 均为浮点数 
-          gl_FragColor = vec4(0.0,0.7,1.0,1.0);
+          gl_FragColor = texture2D(u_texture,v_texCoord);
          }
       `;
-
+      const image = new Image();
+      // image.crossOrigin = "anonymous";
+      image.src = "./1.jpg";
       // 初始化着色器
       function createShader(gl, type, source) {
         //创建shader对象
@@ -73,42 +81,66 @@
         let program = createProgram(gl, vsShader, fsShader);
         return program;
       }
-      //创建缓冲区
-      const buffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
       //初始化shader程序
       const program = initWebGL(gl, vsSource, fsSource);
       //告诉WebGL使用我们刚刚初始化的这个程序
       gl.useProgram(program);
 
+      //创建缓冲区
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
       let pointData = [];
       const n = 5;
       const R = 0.15,
-        r = 0.05;
-      for (let i = 0; i < 2 * n; i++) {
-        const per = Math.PI / n;
-        if (i % 2 === 0) {
-          pointData.push(r * Math.cos(i * per), r * Math.sin(i * per));
-        } else {
-          pointData.push(R * Math.cos(i * per), R * Math.sin(i * per));
-        }
+        r = 0.1;
+        for (let i = 0; i < 2 * n; i++) {
+          const per = Math.PI / n;
+          if (i % 2 === 0) {
+            pointData.push(r * Math.cos(i * per), r * Math.sin(i * per));
+          } else {
+            pointData.push(R * Math.cos(i * per), R * Math.sin(i * per));
+          }
       }
+
+      const texCoordPos = pointData;
 
       gl.bufferData(
         gl.ARRAY_BUFFER,
         new Float32Array(pointData),
         gl.STATIC_DRAW
       );
+
+      const imageBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, imageBuffer);
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(texCoordPos),
+        gl.STATIC_DRAW
+      );
+
+      //创建纹理
+      const texture = gl.createTexture();
+      //绑定纹理
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+
       let Tx = 0.0,
         Ty = 0.0,
-        Tz = 0.0,
-        Tw = 1.0;
+        Tz = 0.5,
+        Tw = 1.0,
+        angle = 0.0,
+        Ta = 0.0,
+        Tb = 0.0,
+        Tc = 0.0;
 
-      const move = () => {        
-        Tx += 0.005
-        Ty += 0.005
-        Tz += 0.01
+      const move = () => {
+        // if (Tx < 0.5 && Ty < 0.5) {
+        Tx += 0.005;
+        Ty += 0.005;
+        angle -= Math.PI / 30;
+        Ta += 0.005;
+        Tb += 0.005;
+
         const matMove = new Float32Array([
           1.0,
           0.0,
@@ -124,22 +156,88 @@
           0.0,
           Tx,
           Ty,
-          Tz,
+          0.0,
           1.0,
         ]);
+
+        const matRotate = new Float32Array([
+          Math.cos(angle),
+          Math.sin(angle),
+          0.0,
+          0.0,
+          -Math.sin(angle),
+          Math.cos(angle),
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+        ]);
+
+        const matSize = new Float32Array([
+          Ta,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          Tb,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          Tc,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+        ]);
+
         const matLocation = gl.getUniformLocation(program, "matMove");
+        const mat2Location = gl.getUniformLocation(program, "matRotate");
+        const mat3Location = gl.getUniformLocation(program, "matSize");
         gl.uniformMatrix4fv(matLocation, false, matMove); //用来赋值的
+        gl.uniformMatrix4fv(mat2Location, false, matRotate); //用来赋值的
+        gl.uniformMatrix4fv(mat3Location, false, matSize); //用来赋值的
         //获取shder中a_Position中的地址
         const a_Position = gl.getAttribLocation(program, "a_Position");
+        const a_texCoord = gl.getAttribLocation(program, "a_texCoord");
 
         gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(a_Position);
+
+        gl.vertexAttribPointer(a_texCoord, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_texCoord);
+
+        // 这告诉WebGL如果纹理需要被缩小时，采用线性插值的方式来进行采样
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        // 这告诉WebGL如果纹理需要被方法时，采用线性插值的方式来进行采样
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        // 告诉WebGL如果纹理坐标超出了s坐标的最大/最小值，直接取边界值
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        // 告诉WebGL如果纹理坐标超出了t坐标的最大/最小值，直接取边界值
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        image.onload = () => {
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+          gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGBA,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            image
+          );
+        };
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 10);
-        requestAnimationFrame(move)
+        requestAnimationFrame(move);
       };
-      move()
-
-
+      move();
     </script>
   </body>
 </html>
