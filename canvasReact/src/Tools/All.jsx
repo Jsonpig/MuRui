@@ -7,8 +7,6 @@ let canvasBox2 = "";
 let ctxOne = "";
 let ctxTwo = "";
 let canvasele = "";
-let imgW = 200;
-let imgH = 200;
 
 //创建圆
 const drawYuan = (newDrawType) => {
@@ -148,8 +146,10 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
     //画边框
     const drawBorder = (removeX, removeY, rool, distance) => {
       ctx2.clearRect(0, 0, canvas2Dom.width, canvas2Dom.height);
-      imgW -= distance/2  || 0;
-      imgH -= distance/2 || 0;
+      let imgW = 200;
+      let imgH = 200;
+      imgW -= distance / 2 || 0;
+      imgH -= distance / 2 || 0;
       const rot = rool * 3.6;
       ctx2.save();
       ctx2.translate(removeX + 100, removeY + 100);
@@ -196,7 +196,6 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
       drawType = newDrawType;
       img.crossOrigin = "anonymous";
       img.src = imgUrl;
-      
 
       img.onload = () => {
         ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
@@ -442,11 +441,11 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
       }
     };
     //旋转
-    const rotateImage = (rool, value2, removeX, removeY, distance) => {
+    const rotateImage = (rool, value2, removeX, removeY, imgWidth,imgHeight) => {
       const scale = value2 / 50;
       const rot = rool * 3.6;
-      imgW -= distance * 4 || 0;
-      imgH -= distance * 4 || 0;
+      const imgW = imgWidth ;
+      const imgH = imgHeight 
       ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
       ctx2.clearRect(0, 0, canvas2Dom.width, canvas2Dom.height);
       if (drawType === "矩形") {
@@ -459,7 +458,6 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
           canvasEle.rectangleHeight * scale
         );
         ctx.fill();
-        
       }
       //圆形
       if (drawType === "圆形") {
@@ -534,6 +532,57 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
         ctx.restore();
         ctx2.restore();
       }
+    };
+
+    const changeImageSize = (
+      rool,
+      removeX,
+      removeY,
+      centerX,
+      centerY,
+      imgW,
+      imgH
+    ) => {
+      const rot = rool * 3.6;
+      ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+      ctx2.clearRect(0, 0, canvas2Dom.width, canvas2Dom.height);
+      ctx2.clearRect(0, 0, canvas2Dom.width, canvas2Dom.height);
+      ctx.save();
+      ctx2.save();
+      ctx.translate(removeX + imgW / 2, removeY + imgH / 2);
+      ctx2.translate(removeX + imgW / 2, removeY + imgH / 2);
+      ctx.rotate((rot * Math.PI) / 180);
+      ctx2.rotate((rot * Math.PI) / 180);
+      ctx.translate(-removeX - imgW / 2, -removeY - imgH / 2);
+      ctx2.translate(-removeX - imgW / 2, -removeY - imgH / 2);
+      ctx.drawImage(img, centerX - 0.5*imgW , centerY -0.5*imgH, imgW, imgH);
+      ctx2.moveTo(centerX, centerY - imgH / 2);
+      ctx2.lineTo(centerX, centerY - imgH / 2 - 36);
+      ctx2.rect(centerX - imgW / 2, centerY - imgH / 2, imgW, imgH);
+      ctx2.lineWidth = 3;
+      ctx2.stroke();
+      ctx2.beginPath();
+      const r1 = contorlRect(centerX - 6, centerY - imgH / 2 - 36);
+      const r2 = contorlRect(centerX - imgW / 2 - 12, centerY - imgH / 2 - 12);
+      const r3 = contorlRect(centerX - 6, centerY - imgH / 2 - 12);
+      const r4 = contorlRect(centerX + imgW / 2, centerY - imgH / 2 - 12);
+      const r5 = contorlRect(centerX - imgW / 2 - 12, centerY - 6);
+      const r6 = contorlRect(centerX + imgW / 2, centerY - 6);
+      const r7 = contorlRect(centerX - imgW / 2 - 12, centerY + imgH / 2);
+      const r8 = contorlRect(centerX - 6, centerY + imgH / 2);
+      const r9 = contorlRect(centerX + imgW / 2, centerY + imgH / 2);
+      ctx2.fill(r1);
+      ctx2.fill(r2);
+      ctx2.fill(r3);
+      ctx2.fill(r4);
+      ctx2.fill(r5);
+      ctx2.fill(r6);
+      ctx2.fill(r7);
+      ctx2.fill(r8);
+      ctx2.fill(r9);
+      ctx2.closePath();
+      ctx.restore();
+      ctx2.restore();
     };
 
     const clear = () => {
@@ -635,7 +684,7 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
       changeSize,
       changeOpacity,
       rotateImage,
-      // changeImageSize,
+      changeImageSize,
       shadow,
       clear,
       clear2,
