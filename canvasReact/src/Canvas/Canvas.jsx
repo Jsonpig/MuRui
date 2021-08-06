@@ -19,8 +19,8 @@ function Canvas(props) {
   const changeY = React.useRef(0);
   const changeOldX = React.useRef(0);
   const changeOldY = React.useRef(0);
-  const imgWidth = React.useRef(200)
-  const imgHeight = React.useRef(200)
+  const imgWidth = React.useRef(200);
+  const imgHeight = React.useRef(200);
   const [rotateValue, setRotateValue] = useState(0);
   const angle = Number(rotateValue) * (Math.PI / 50);
   const JudgePoint = (point, eX, eY, OldX, OldY) => {
@@ -87,60 +87,29 @@ function Canvas(props) {
           const { left, top } = canvasRef.current.getBoundingClientRect();
           let eX = e.clientX - left; //在画布上点击的坐标
           let eY = e.clientY - top;
+          let OldX = changeOldX.current;
+          let OldY = changeOldY.current;
           initCanvas(canvasRef.current).pick(e, divHoveredDom);
           if (
-            initCanvas(canvasRef.current).isPointInImage(
-              [eX, eY],
+            JudgePoint(
               [
-                [
-                  // 计算旋转之后锁定区域的坐标
-                  -106 * Math.cos(angle) -
-                    -106 * Math.sin(angle) +
-                    changeOldX.current +
-                    100,
-                  -106 * Math.sin(angle) +
-                    -106 * Math.cos(angle) +
-                    changeOldY.current +
-                    100,
-                ],
-                [
-                  106 * Math.cos(angle) -
-                    -106 * Math.sin(angle) +
-                    changeOldX.current +
-                    100,
-                  106 * Math.sin(angle) +
-                    -106 * Math.cos(angle) +
-                    changeOldY.current +
-                    100,
-                ],
-                [
-                  106 * Math.cos(angle) -
-                    106 * Math.sin(angle) +
-                    changeOldX.current +
-                    100,
-                  106 * Math.sin(angle) +
-                    106 * Math.cos(angle) +
-                    changeOldY.current +
-                    100,
-                ],
-                [
-                  -106 * Math.cos(angle) -
-                    106 * Math.sin(angle) +
-                    changeOldX.current +
-                    100,
-                  -106 * Math.sin(angle) +
-                    106 * Math.cos(angle) +
-                    changeOldY.current +
-                    100,
-                ],
-              ]
+                [OldX, OldY],
+                [OldX + 200, OldY],
+                [OldX + 206, OldY + 200],
+                [OldX, OldY + 200],
+              ],
+              eX,
+              eY,
+              OldX,
+              OldY
             )
           ) {
             initCanvas(canvasRef.current, canvas2Ref.current).rotateImage(
               rotateValue,
               50,
               changeX.current,
-              changeY.current
+              changeY.current,
+              0
             );
           }
         }}
@@ -154,10 +123,10 @@ function Canvas(props) {
           if (
             JudgePoint(
               [
-                [OldX + 194, OldY - 6],
-                [OldX + 206, OldY - 6],
-                [OldX + 206, OldY + 6],
-                [OldX + 194, OldY + 6],
+                [OldX + 200, OldY - 12],
+                [OldX + 212, OldY - 12],
+                [OldX + 212, OldY],
+                [OldX + 200, OldY],
               ],
               eX,
               eY,
@@ -169,10 +138,10 @@ function Canvas(props) {
           } else if (
             JudgePoint(
               [
-                [OldX - 6, OldY - 6],
-                [OldX + 6, OldY - 6],
-                [OldX + 6, OldY + 6],
-                [OldX - 6, OldY + 6],
+                [OldX - 12, OldY - 12],
+                [OldX, OldY - 12],
+                [OldX, OldY],
+                [OldX - 12, OldY],
               ],
               eX,
               eY,
@@ -184,10 +153,10 @@ function Canvas(props) {
           } else if (
             JudgePoint(
               [
-                [OldX + 94, OldY - 6],
-                [OldX + 106, OldY - 6],
-                [OldX + 106, OldY + 6],
-                [OldX + 94, OldY + 6],
+                [OldX + 94, OldY - 12],
+                [OldX + 106, OldY - 12],
+                [OldX + 106, OldY],
+                [OldX + 94, OldY],
               ],
               eX,
               eY,
@@ -199,10 +168,10 @@ function Canvas(props) {
           } else if (
             JudgePoint(
               [
-                [OldX - 6, OldY + 94],
-                [OldX + 6, OldY + 94],
-                [OldX + 6, OldY + 106],
-                [OldX - 6, OldY + 106],
+                [OldX - 12, OldY + 94],
+                [OldX, OldY + 94],
+                [OldX, OldY + 106],
+                [OldX - 12, OldY + 106],
               ],
               eX,
               eY,
@@ -214,10 +183,10 @@ function Canvas(props) {
           } else if (
             JudgePoint(
               [
-                [OldX + 194, OldY + 94],
-                [OldX + 206, OldY + 94],
-                [OldX + 206, OldY + 106],
-                [OldX + 194, OldY + 106],
+                [OldX + 200, OldY + 94],
+                [OldX + 212, OldY + 94],
+                [OldX + 212, OldY + 106],
+                [OldX + 200, OldY + 106],
               ],
               eX,
               eY,
@@ -229,10 +198,10 @@ function Canvas(props) {
           } else if (
             JudgePoint(
               [
-                [OldX - 6, OldY + 194],
-                [OldX + 6, OldY + 194],
-                [OldX + 6, OldY + 206],
-                [OldX - 6, OldY + 206],
+                [OldX - 12, OldY + 200],
+                [OldX, OldY + 200],
+                [OldX, OldY + 212],
+                [OldX - 12, OldY + 212],
               ],
               eX,
               eY,
@@ -244,10 +213,10 @@ function Canvas(props) {
           } else if (
             JudgePoint(
               [
-                [OldX + 94, OldY + 194],
-                [OldX + 106, OldY + 194],
-                [OldX + 106, OldY + 206],
-                [OldX + 94, OldY + 206],
+                [OldX + 94, OldY + 200],
+                [OldX + 106, OldY + 200],
+                [OldX + 106, OldY + 212],
+                [OldX + 94, OldY + 212],
               ],
               eX,
               eY,
@@ -259,10 +228,10 @@ function Canvas(props) {
           } else if (
             JudgePoint(
               [
-                [OldX + 194, OldY + 194],
-                [OldX + 206, OldY + 194],
-                [OldX + 206, OldY + 206],
-                [OldX + 194, OldY + 206],
+                [OldX + 200, OldY + 200],
+                [OldX + 212, OldY + 200],
+                [OldX + 212, OldY + 212],
+                [OldX + 200, OldY + 212],
               ],
               eX,
               eY,
@@ -276,12 +245,12 @@ function Canvas(props) {
               [
                 [
                   // 计算旋转之后锁定区域的坐标
-                  OldX - 6,
-                  OldY - 6,
+                  OldX,
+                  OldY,
                 ],
-                [OldX + 196, OldY - 6],
-                [OldX + 196, OldY + 196],
-                [OldX - 6, OldY + 196],
+                [OldX + 200, OldY],
+                [OldX + 200, OldY + 200],
+                [OldX, OldY + 200],
               ],
               eX,
               eY,
@@ -299,12 +268,6 @@ function Canvas(props) {
           const { left, top } = canvasRef.current.getBoundingClientRect();
           let eX = e.clientX - left; //在画布上点击的坐标
           let eY = e.clientY - top;
-          const centerX = eX+imgWidth.current/2
-          const centerY = eX+imgHeight.current/2
-         const callback=({imgW,imgH})=>{
-              imgWidth.current=imgW
-              imgHeight.current = imgH
-          }
           if (!showFlag.current) {
             initCanvas(canvasRef.current).liImage(
               "图片",
@@ -337,10 +300,10 @@ function Canvas(props) {
           if (
             JudgePoint(
               [
-                [OldX - 6, OldY - 6],
-                [OldX + 206, OldY - 6],
-                [OldX + 206, OldY + 206],
-                [OldX - 6, OldY + 206],
+                [OldX, OldY],
+                [OldX + 200, OldY],
+                [OldX + 206, OldY + 200],
+                [OldX, OldY + 200],
               ],
               eX,
               eY,
@@ -353,144 +316,14 @@ function Canvas(props) {
               const scale = (e.movementX + e.movementY) / 2;
               let eX = e.clientX - left;
               let eY = e.clientY - top;
-              if (
-                //右上角
-                // JudgePoint(
-                //   [
-                //     [OldX + 194, OldY - 6],
-                //     [OldX + 206, OldY - 6],
-                //     [OldX + 206, OldY + 6],
-                //     [OldX + 194, OldY + 6],
-                //   ],
-                //   eX,
-                //   eY,
-                //   OldX,
-                //   OldY
-                // ) ||
-                //左上角
-                JudgePoint(
-                  [
-                    [OldX - 6, OldY - 6],
-                    [OldX + 6, OldY - 6],
-                    [OldX + 6, OldY + 6],
-                    [OldX - 6, OldY + 6],
-                  ],
-                  eX,
-                  eY,
-                  OldX,
-                  OldY
-                  // ) ||
-                  // JudgePoint(
-                  //   [
-                  //     [OldX + 94, OldY - 6],
-                  //     [OldX + 106, OldY - 6],
-                  //     [OldX + 106, OldY + 6],
-                  //     [OldX + 94, OldY + 6],
-                  //   ],
-                  //   eX,
-                  //   eY,
-                  //   OldX,
-                  //   OldY
-                  // ) ||
-                  // JudgePoint(
-                  //   [
-                  //     [OldX - 6, OldY + 94],
-                  //     [OldX + 6, OldY + 94],
-                  //     [OldX + 6, OldY + 106],
-                  //     [OldX - 6, OldY + 106],
-                  //   ],
-                  //   eX,
-                  //   eY,
-                  //   OldX,
-                  //   OldY
-                  // ) ||
-                  // JudgePoint(
-                  //   [
-                  //     [OldX + 194, OldY + 94],
-                  //     [OldX + 206, OldY + 94],
-                  //     [OldX + 206, OldY + 106],
-                  //     [OldX + 194, OldY + 106],
-                  //   ],
-                  //   eX,
-                  //   eY,
-                  //   OldX,
-                  //   OldY
-                  // ) ||
-                  // JudgePoint(
-                  //   [
-                  //     [OldX - 6, OldY + 194],
-                  //     [OldX + 6, OldY + 194],
-                  //     [OldX + 6, OldY + 206],
-                  //     [OldX - 6, OldY + 206],
-                  //   ],
-                  //   eX,
-                  //   eY,
-                  //   OldX,
-                  //   OldY
-                  // ) ||
-                  // JudgePoint(
-                  //   [
-                  //     [OldX + 94, OldY + 194],
-                  //     [OldX + 106, OldY + 194],
-                  //     [OldX + 106, OldY + 206],
-                  //     [OldX + 94, OldY + 206],
-                  //   ],
-                  //   eX,
-                  //   eY,
-                  //   OldX,
-                  //   OldY
-                  // ) ||
-                  // JudgePoint(
-                  //   [
-                  //     [OldX + 194, OldY + 194],
-                  //     [OldX + 206, OldY + 194],
-                  //     [OldX + 206, OldY + 206],
-                  //     [OldX + 194, OldY + 206],
-                  //   ],
-                  //   eX,
-                  //   eY,
-                  //   OldX,
-                  //   OldY
-                )
-              ) {
-
-                //   //更新图片坐标的位置
-                initCanvas(canvasRef.current, canvas2Ref.current).changeImageSize(
-                  rotateValue,
-                  centerX,
-                  centerY,
-                  scale,
-                  callback,
-                  imgWidth.current,
-                  imgHeight.current
-                );
-                return;
-              } else if (
-                JudgePoint(
-                  [
-                    [OldX - 6, OldY - 6],
-                    [OldX + 196, OldY - 6],
-                    [OldX + 196, OldY + 196],
-                    [OldX - 6, OldY + 196],
-                  ],
-                  eX,
-                  eY,
-                  OldX,
-                  OldY
-                )
-              ) {
-                canvasRef.current.style = "cursor:move";
-              } else {
-                canvasRef.current.style = "cursor:default";
-              }
-              // //更新图片坐标的位置
-              // initCanvas(canvasRef.current, canvas2Ref.current).rotateImage(
-              //   rotateValue,
-              //   50,
-              //   changeX.current,
-              //   changeY.current,
-              //   0 //不进行缩放
-              // );
+              //更新图片坐标的位置
+              initCanvas(canvasRef.current, canvas2Ref.current).rotateImage(
+                rotateValue,
+                50,
+                changeX.current,
+                changeY.current,
+                0 //不进行缩放
+              );
               changeX.current = eX - xD;
               changeY.current = eY - yD;
               canvasRef.current.onmouseup = () => {
@@ -501,6 +334,68 @@ function Canvas(props) {
                 canvasRef.current.onmousemove = null;
               };
             };
+          }
+          //如果点击的是在左上角
+          if (
+            JudgePoint(
+              [
+                [OldX - 6, OldY - 6],
+                [OldX + 6, OldY - 6],
+                [OldX + 6, OldY + 6],
+                [OldX - 6, OldY + 6],
+              ],
+              eX,
+              eY,
+              OldX,
+              OldY
+            )
+          ) {
+            canvasRef.current.onmousemove = (e) => {
+              const scale = (e.movementX + e.movementY) / 2;
+              let eX = e.clientX - left;
+              let eY = e.clientY - top;
+              //更新图片坐标的位置
+              initCanvas(canvasRef.current, canvas2Ref.current).rotateImage(
+                rotateValue,
+                50,
+                changeX.current,
+                changeY.current,
+                scale
+              );
+              changeX.current = eX - xD;
+              changeY.current = eY - yD;
+
+              canvasRef.current.onmouseup = () => {
+                //鼠标再次抬起更新可点击区域的坐标
+                changeOldX.current = changeX.current;
+                changeOldY.current = changeY.current;
+                initCanvas(canvasRef.current, canvas2Ref.current).clear2();
+                // initCanvas(canvasRef.current, canvas2Ref.current).drawBorder(
+                //   changeX.current,
+                //   changeY.current,
+                //   rotateValue,
+                //   0
+                // );
+                canvasRef.current.onmousemove = null;
+              };
+            };
+          } else if (
+            JudgePoint(
+              [
+                [OldX, OldY],
+                [OldX + 200, OldY],
+                [OldX + 200, OldY + 200],
+                [OldX, OldY + 200],
+              ],
+              eX,
+              eY,
+              OldX,
+              OldY
+            )
+          ) {
+            canvasRef.current.style = "cursor:move";
+          } else {
+            canvasRef.current.style = "cursor:default";
           }
         }}
       ></canvas>

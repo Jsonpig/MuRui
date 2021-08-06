@@ -146,29 +146,30 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
       ctx.fillText(writeText, canvasEle.x0, canvasEle.y0);
     };
     //画边框
-    const drawBorder = (removeX, removeY, rool) => {
-      // ctx2.clearRect(0,0,canvas2Dom.width,canvas2Dom.height)
+    const drawBorder = (removeX, removeY, rool, distance) => {
+      ctx2.clearRect(0, 0, canvas2Dom.width, canvas2Dom.height);
+      imgW -= distance/2  || 0;
+      imgH -= distance/2 || 0;
       const rot = rool * 3.6;
       ctx2.save();
       ctx2.translate(removeX + 100, removeY + 100);
       ctx2.rotate((rot * Math.PI) / 180);
       ctx2.translate(-removeX - 100, -removeY - 100);
-      // ctx2.restore()
-      ctx2.moveTo(removeX + 100, removeY);
-      ctx2.lineTo(removeX + 100, removeY - 36);
-      ctx2.rect(removeX, removeY, 200, 200);
+      ctx2.moveTo(removeX + imgW / 2, removeY);
+      ctx2.lineTo(removeX + imgW / 2, removeY - 36);
+      ctx2.rect(removeX, removeY, imgW, imgH);
       ctx2.lineWidth = 3;
       ctx2.stroke();
-      const r1 = contorlRect(removeX + 94, removeY - 36);
-      const r2 = contorlRect(removeX - 6, removeY - 6);
-      const r3 = contorlRect(removeX + 94, removeY - 6);
-      const r4 = contorlRect(removeX + 194, removeY - 6);
-      const r5 = contorlRect(removeX - 6, removeY + 94);
-      const r6 = contorlRect(removeX - 6, removeY + 194);
-      const r7 = contorlRect(removeX + 94, removeY + 194);
-      const r8 = contorlRect(removeX - 6, removeY + 194);
-      const r9 = contorlRect(removeX + 194, removeY + 94);
-      const r10 = contorlRect(removeX + 194, removeY + 194);
+      ctx2.beginPath();
+      const r1 = contorlRect(removeX + imgW / 2 - 6, removeY - 36);
+      const r2 = contorlRect(removeX - 12, removeY - 12);
+      const r3 = contorlRect(removeX + imgW / 2 - 6, removeY - 12);
+      const r4 = contorlRect(removeX + imgW, removeY - 12);
+      const r5 = contorlRect(removeX - 12, removeY + imgH / 2 - 6);
+      const r6 = contorlRect(removeX + imgW, removeY + imgH / 2 - 6);
+      const r7 = contorlRect(removeX - 12, removeY + imgH);
+      const r8 = contorlRect(removeX + imgW / 2 - 6, removeY + imgH);
+      const r9 = contorlRect(removeX + imgW, removeY + imgH);
       ctx2.fill(r1);
       ctx2.fill(r2);
       ctx2.fill(r3);
@@ -178,7 +179,7 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
       ctx2.fill(r7);
       ctx2.fill(r8);
       ctx2.fill(r9);
-      ctx2.fill(r10);
+      ctx2.closePath();
       ctx2.restore();
     };
     //引入图片
@@ -195,6 +196,7 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
       drawType = newDrawType;
       img.crossOrigin = "anonymous";
       img.src = imgUrl;
+      
 
       img.onload = () => {
         ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
@@ -443,15 +445,13 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
     const rotateImage = (rool, value2, removeX, removeY, distance) => {
       const scale = value2 / 50;
       const rot = rool * 3.6;
-      imgW -= distance * 2 || 0;
-      imgH -= distance * 2 || 0;
+      imgW -= distance * 4 || 0;
+      imgH -= distance * 4 || 0;
       ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
       ctx2.clearRect(0, 0, canvas2Dom.width, canvas2Dom.height);
       if (drawType === "矩形") {
-        // ctx.translate(canvasEle.x0 - 50, canvasEle.y0 - 50);
         ctx.rotate((rot * Math.PI) / 180);
         ctx.fillStyle = canvasEle.fillStyle;
-        // ctx.beginPath();
         ctx.fillRect(
           canvasEle.x0 - 50,
           canvasEle.y0 - 50,
@@ -459,6 +459,7 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
           canvasEle.rectangleHeight * scale
         );
         ctx.fill();
+        
       }
       //圆形
       if (drawType === "圆形") {
@@ -512,15 +513,14 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
         ctx2.stroke();
         ctx2.beginPath();
         const r1 = contorlRect(removeX + imgW / 2 - 6, removeY - 36);
-        const r2 = contorlRect(removeX - 6, removeY - 6);
-        const r3 = contorlRect(removeX + imgW / 2 - 6, removeY - 6);
-        const r4 = contorlRect(removeX + imgW - 6, removeY - 6);
-        const r5 = contorlRect(removeX - 6, removeY + imgH / 2 - 6);
-        const r6 = contorlRect(removeX - 6, removeY + imgH - 6);
-        const r7 = contorlRect(removeX + imgW / 2 - 6, removeY + imgH - 6);
-        const r8 = contorlRect(removeX - 6, removeY + imgH - 6);
-        const r9 = contorlRect(removeX + imgW - 6, removeY + imgH / 2 - 6);
-        const r10 = contorlRect(removeX + imgW - 6, removeY + imgH - 6);
+        const r2 = contorlRect(removeX - 12, removeY - 12);
+        const r3 = contorlRect(removeX + imgW / 2 - 6, removeY - 12);
+        const r4 = contorlRect(removeX + imgW, removeY - 12);
+        const r5 = contorlRect(removeX - 12, removeY + imgH / 2 - 6);
+        const r6 = contorlRect(removeX + imgW, removeY + imgH / 2 - 6);
+        const r7 = contorlRect(removeX - 12, removeY + imgH);
+        const r8 = contorlRect(removeX + imgW / 2 - 6, removeY + imgH);
+        const r9 = contorlRect(removeX + imgW, removeY + imgH);
         ctx2.fill(r1);
         ctx2.fill(r2);
         ctx2.fill(r3);
@@ -530,60 +530,12 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
         ctx2.fill(r7);
         ctx2.fill(r8);
         ctx2.fill(r9);
-        ctx2.fill(r10);
         ctx2.closePath();
         ctx.restore();
         ctx2.restore();
       }
     };
 
-    //缩放图片固定位置
-    const changeImageSize = (rool, removeX, removeY, distance,callback,imgW) => {
-      const rot = rool * 3.6;
-      imgW -= distance * 2 || 0;
-      imgH -= distance * 2 || 0;
-      callback&& callback({imgW,imgH})
-      ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
-      ctx2.clearRect(0, 0, canvas2Dom.width, canvas2Dom.height);
-      ctx.save();
-      ctx2.save();
-      ctx.translate(removeX, removeY);
-      ctx2.translate(removeX , removeY);
-      ctx.rotate((rot * Math.PI) / 180);
-      ctx2.rotate((rot * Math.PI) / 180);
-      ctx.translate(-removeX, -removeY);
-      ctx2.translate(-removeX , -removeY);
-      ctx.drawImage(img, removeX-imgW/2, removeY-imgH/2, imgW, imgH);
-      ctx2.moveTo(removeX , removeY);
-      ctx2.lineTo(removeX, removeY - 36);
-      ctx2.rect(removeX, removeY, imgW, imgH);
-      ctx2.lineWidth = 3;
-      ctx2.stroke();
-      ctx2.beginPath();
-      const r1 = contorlRect(removeX , removeY - 36);
-      const r2 = contorlRect(removeX - 6, removeY - 6);
-      const r3 = contorlRect(removeX, removeY - 6);
-      const r4 = contorlRect(removeX + imgW/2 - 6, removeY - 6);
-      const r5 = contorlRect(removeX - 6, removeY + imgH / 2 - 6);
-      const r6 = contorlRect(removeX - 6, removeY + imgH - 6);
-      const r7 = contorlRect(removeX - imgW / 2 - 6, removeY + imgH/2 - 6);
-      const r8 = contorlRect(removeX , removeY + imgH/2 - 6);
-      const r9 = contorlRect(removeX + imgW/2 - 6, removeY + imgH / 2 - 6);
-      const r10 = contorlRect(removeX + imgW - 6, removeY + imgH - 6);
-      ctx2.fill(r1);
-      ctx2.fill(r2);
-      ctx2.fill(r3);
-      ctx2.fill(r4);
-      ctx2.fill(r5);
-      ctx2.fill(r6);
-      ctx2.fill(r7);
-      ctx2.fill(r8);
-      ctx2.fill(r9);
-      ctx2.fill(r10);
-      ctx2.closePath();
-      ctx.restore();
-      ctx2.restore();
-    };
     const clear = () => {
       ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
     };
@@ -683,7 +635,7 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
       changeSize,
       changeOpacity,
       rotateImage,
-      changeImageSize,
+      // changeImageSize,
       shadow,
       clear,
       clear2,
