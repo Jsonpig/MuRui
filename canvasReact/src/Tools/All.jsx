@@ -39,6 +39,8 @@ const contorlRect = (removeX, removeY) => {
   path.fillStyle = "black";
   return path;
 };
+
+
 const initCanvas = (canvasDom, canvas2Dom, value) => {
   if (canvasDom) {
     const canvasEle = {
@@ -441,11 +443,19 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
       }
     };
     //旋转
-    const rotateImage = (rool, value2, removeX, removeY, imgWidth,imgHeight) => {
+    const rotateImage = (
+      rool,
+      value2,
+      removeX,
+      removeY,
+      imgWidth,
+      imgHeight
+    ) => {
       const scale = value2 / 50;
-      const rot = rool * 3.6;
-      const imgW = imgWidth ;
-      const imgH = imgHeight 
+      console.log(rool)
+      const rot = rool;
+      const imgW = imgWidth;
+      const imgH = imgHeight;
       ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
       ctx2.clearRect(0, 0, canvas2Dom.width, canvas2Dom.height);
       if (drawType === "矩形") {
@@ -546,7 +556,6 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
       const rot = rool * 3.6;
       ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
       ctx2.clearRect(0, 0, canvas2Dom.width, canvas2Dom.height);
-      ctx2.clearRect(0, 0, canvas2Dom.width, canvas2Dom.height);
       ctx.save();
       ctx2.save();
       ctx.translate(removeX + imgW / 2, removeY + imgH / 2);
@@ -555,7 +564,13 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
       ctx2.rotate((rot * Math.PI) / 180);
       ctx.translate(-removeX - imgW / 2, -removeY - imgH / 2);
       ctx2.translate(-removeX - imgW / 2, -removeY - imgH / 2);
-      ctx.drawImage(img, centerX - 0.5*imgW , centerY -0.5*imgH, imgW, imgH);
+      ctx.drawImage(
+        img,
+        centerX - 0.5 * imgW,
+        centerY - 0.5 * imgH,
+        imgW,
+        imgH
+      );
       ctx2.moveTo(centerX, centerY - imgH / 2);
       ctx2.lineTo(centerX, centerY - imgH / 2 - 36);
       ctx2.rect(centerX - imgW / 2, centerY - imgH / 2, imgW, imgH);
