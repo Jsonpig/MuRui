@@ -1,4 +1,3 @@
-// import drawYuan from "./drawCircle"
 const img = new Image();
 // canvas1
 let canvasBox1 = "";
@@ -72,7 +71,6 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
       ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
       ctx2.clearRect(0, 0, canvas2Dom.width, canvas2Dom.height);
       ctx.fillStyle = canvasEle.fillStyle;
-      ctx.beginPath();
       ctx.fillRect(
         canvasEle.x0 - 50,
         canvasEle.y0 - 50,
@@ -444,7 +442,7 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
     };
     //旋转
     const rotateImage = (
-      rool,
+      rot,
       value2,
       removeX,
       removeY,
@@ -452,8 +450,6 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
       imgHeight
     ) => {
       const scale = value2 / 50;
-      console.log(rool)
-      const rot = rool;
       const imgW = imgWidth;
       const imgH = imgHeight;
       ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);

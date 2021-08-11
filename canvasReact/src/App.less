@@ -43,7 +43,7 @@
           }
         }
       }
-      #imageFont{
+      #imageFont {
         font-size: 22px;
       }
     }
@@ -88,6 +88,25 @@
       left: 220px;
       top: 150px;
       background-color: gray;
+
+      .FabricTools{
+        position: absolute;
+        z-index: 1000
+      }
+      .canvas-container {
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 1;
+        #canvas3 {
+          top: 50% !important;
+          left: 50% !important;
+        }
+        .upper-canvas {
+          left: 50% !important;
+          top: 1.3%!important;
+          transform: translateX(-50%);
+        }
+      }
       #canvas {
         position: absolute;
         left: 50%;
@@ -97,6 +116,12 @@
       #canvas2 {
         position: absolute;
         background-color: white;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+        top: 50%;
+      }
+      #canvas3{
+        position: absolute;
         left: 50%;
         transform: translateX(-50%) translateY(-50%);
         top: 50%;

@@ -6,7 +6,7 @@ import BeiLine from "./BeiLine";
 import Image from "./Image";
 //导航栏
 function NavigationBar(props) {
-  const { canvasDom, canvas2Dom, getWriteText, writeText, getX, getY } = props;
+  const { canvasDom, canvas2Dom, getWriteText, writeText, getX, getY,divHoveredDom} = props;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
   useEffect(() => {
@@ -25,6 +25,7 @@ function NavigationBar(props) {
         ></Text>
         <BeiLine canvasDom={canvasDom} canvas2Dom={canvas2Dom}></BeiLine>
         <Image
+          divHoveredDom={divHoveredDom}
           canvasDom={canvasDom}
           canvas2Dom={canvas2Dom}
           x={x}
