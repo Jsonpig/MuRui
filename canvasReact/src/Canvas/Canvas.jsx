@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { fabric } from "fabric";
 import { initCanvas } from "../Tools/All";
-import fabricDraw  from "../Tools/FabricDraw";
-import isGroup from "./groupControl";
+import FabricBox from "./FabricDraw";
 import { tr, tl, tm, ml, mr, bl, br, bm } from "./pointControl";
 //画布页面
 function Canvas(props) {
@@ -26,10 +24,7 @@ function Canvas(props) {
   const imgWidth = React.useRef(200);
   const imgHeight = React.useRef(200);
   const [rotateValue, setRotateValue] = useState(0);
-  const [bol, setBol] = useState(false);
-  const [type, setType] = useState(null);
   const angle = Number(rotateValue) * (Math.PI / 180) + 2 * Math.PI;
-  const canvas = new fabric.Canvas("canvas3");
   const JudgePoint = (point, eX, eY, OldX, OldY, iWidth, iHeight) => {
     const touch = [eX, eY];
     const pointArr = []; //接收传入进来的数组
@@ -56,69 +51,11 @@ function Canvas(props) {
     getCanvas2Dom(canvas2Ref.current);
   }, [canvasHeight, canvasWidth, canvas2Width, canvas2Height, props]);
 
-  useEffect(() => {
-    fabricDraw(canvas, type);
-  }, [type]);
   return (
     <div id="canvas-gray">
       <div className="FabricTools">
         鼠标点击绘制
-        <div className="canvas_btn_box">
-          <button
-            onClick={() => {
-              setType("图片");
-            }}
-          >
-            图片
-          </button>
-          <button
-            onClick={() => {
-              setType("矩形");
-            }}
-          >
-            矩形
-          </button>
-          <button
-            onClick={() => {
-              setType("圆形");
-            }}
-          >
-            圆形
-          </button>
-          <button
-            onClick={() => {
-              initCanvas(canvasRef.current).clear();
-              initCanvas(canvasRef.current, canvas2Ref.current).clear2();
-              setType("折线");
-            }}
-          >
-            折线
-          </button>
-          <button
-            onClick={() => {
-              setType("文字");
-            }}
-          >
-            文本
-          </button>
-          <button
-            onClick={() => {
-              setType("图形");
-            }}
-          >
-            图形
-          </button>
-        </div>
-        <div className="special_require">
-          <button
-            onClick={() => {
-
-            }}
-          >
-            绘制/停止
-          </button>
-          <button onClick={() => isGroup(canvas)}>合并/拆开</button>
-        </div>
+        <FabricBox></FabricBox>
       </div>
       <canvas
         id="canvas3"
@@ -138,7 +75,6 @@ function Canvas(props) {
         width={canvasWidth}
         height={canvasHeight}
         onClick={(e) => {
-          if (type === "图片") {
             const { left, top } = canvasRef.current.getBoundingClientRect();
             let eX = e.clientX - left; //在画布上点击的坐标
             let eY = e.clientY - top;
@@ -170,8 +106,8 @@ function Canvas(props) {
                 imgWidth.current,
                 imgHeight.current
               );
-            }
-          }
+              }
+          
         }}
         //鼠标点击下去
         onMouseDown={(e) => {
@@ -467,7 +403,6 @@ function Canvas(props) {
           }
         }}
         onMouseMove={(e) => {
-          if (type === "图片") {
             const { left, top } = canvasRef.current.getBoundingClientRect();
             let eX = e.clientX - left; //在画布上点击的坐标
             let eY = e.clientY - top;
@@ -660,7 +595,7 @@ function Canvas(props) {
               canvasRef.current.style = "cursor:default";
             }
           }
-        }}
+        }
       ></canvas>
     </div>
   );
