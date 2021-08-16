@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { isGroup, unGroup } from "../Tools/groupControl";
 import rubber from "../Tools/rubber";
 import patternBrush from "../Tools/PatternBrush";
-import filter from '../Tools/filer'
+import { applyFilter, applyFilterValue } from "../Tools/filer";
+
 let fabric = window.fabric;
 function FabricBox() {
   const [brushValue, setBrushValue] = useState("Pencil");
@@ -16,13 +17,22 @@ function FabricBox() {
   let isText = false;
   let removeObj = null;
   let types = "";
+  let stopDraw = true;
+  let f = fabric.Image.filters;
+  let $ = function (id) {
+    return document.getElementById(id);
+  };
+
+  const isWantDraw = () => {
+    stopDraw = !stopDraw;
+  };
 
   const initEvent = () => {
     canvasFabric.on("mouse:down", (event) => {
       downX = event.e.offsetX;
       downY = event.e.offsetY;
       isDraw = true;
-      isText = isText;
+      isText = true;
     });
 
     canvasFabric.on("object:moving", () => {
@@ -38,7 +48,7 @@ function FabricBox() {
     canvasFabric.on("mouse:move", (event) => {
       moveX = event.e.offsetX;
       moveY = event.e.offsetY;
-      if (isDraw) {
+      if (isDraw && stopDraw) {
         switch (types) {
           case "fabricRect":
             rect();
@@ -64,6 +74,7 @@ function FabricBox() {
     });
   };
 
+
   const rect = () => {
     let canvasObj = new fabric.Rect({
       left: downX,
@@ -71,6 +82,7 @@ function FabricBox() {
       width: moveX - downX,
       height: moveY - downY,
       fill: "green",
+      // isDrawingMode:false
     });
     remove(canvasObj);
   };
@@ -107,9 +119,7 @@ function FabricBox() {
     let textObj = new fabric.Textbox("", {
       left: moveX,
       top: downY,
-      fill: "",
-      backgroundColor: "#fff",
-      stroke: "black",
+      fill: "black",
       hasControls: true,
       editable: true,
       selectable: false,
@@ -120,7 +130,6 @@ function FabricBox() {
       textObj.hiddenTextarea?.focus();
     } else {
       textObj.exitEditing();
-      textObj.set("backgroundColor", "rgba(0,0,0,0)");
       if (textObj.text === "") {
         canvasFabric.remove(textObj);
       }
@@ -141,9 +150,10 @@ function FabricBox() {
           scaleY: (moveY - downY) / img.height,
         });
         remove(img);
-      } ,{
-        crossOrigin: 'Anonymous'
-    }
+      },
+      {
+        crossOrigin: "Anonymous",
+      }
     );
   };
 
@@ -205,17 +215,33 @@ function FabricBox() {
         <button id="ungroup" onClick={() => unGroup(canvasFabric)}>
           拆分
         </button>
+        <button onClick={() => isWantDraw()}>绘制/停止</button>
         <div>
-          <button id="rubber" onClick={() => rubber(canvasFabric)}>
+          <button
+            id="rubber"
+            onClick={() => rubber(canvasFabric, 5, "ControlBtn")}
+          >
             橡皮擦
           </button>
-          <input type="range" min={1} max={20} step={1} defaultValue={1} />
+          <input
+            type="range"
+            min={5}
+            defaultValue={5}
+            onChange={(e) => {
+              rubber(canvasFabric, e.target.value, "valueBtn");
+            }}
+          />
         </div>
         <div>
           {" "}
           <button
             onClick={() => {
-              patternBrush(canvasFabric, brushValue, widthValue);
+              patternBrush(
+                canvasFabric,
+                brushValue,
+                widthValue,
+                "ControlValueBrush"
+              );
             }}
           >
             画笔
@@ -223,6 +249,7 @@ function FabricBox() {
           模式
           <select
             onChange={(e) => {
+              patternBrush(canvasFabric, e.target.value, 10, "pattern");
               setBrushValue(e.target.value);
             }}
           >
@@ -237,6 +264,7 @@ function FabricBox() {
             max={50}
             defaultValue={5}
             onChange={(e) => {
+              patternBrush(canvasFabric, brushValue, e.target.value, "width");
               setwidthValue(e.target.value);
             }}
           />
@@ -244,15 +272,100 @@ function FabricBox() {
         <div>
           <div>
             高光
-             <input type="range"  min={-1} max={1} step={0.1} defaultValue={0} onChange = {(e)=>filter(canvasFabric,e.target.value,"高光")}/>
+            <input
+              id="brightness"
+              type="checkbox"
+              onClick={() =>
+                applyFilter(
+                  5,
+                  new f.Brightness({
+                    brightness: parseFloat($("brightness-value").value),
+                  }),
+                  canvasFabric
+                )
+              }
+            />
+            <input
+              type="range"
+              id="brightness-value"
+              min={-1}
+              max={1}
+              step={0.1}
+              defaultValue={0}
+              onChange={(e) => {
+                applyFilterValue(
+                  5,
+                  "brightness",
+                  parseFloat(e.target.value),
+                  canvasFabric
+                );
+              }}
+            />
           </div>
           <div>
             对比
-             <input type="range"  min={-1} max={1} step={0.1} defaultValue={0} onChange = {(e)=>filter(canvasFabric,e.target.value,"对比")}/>
+            <input
+              type="text"
+              id="contrast"
+              type="checkbox"
+              onClick={() =>
+                applyFilter(
+                  5,
+                  new f.Contrast({
+                    contrast: parseFloat($("contrast-value").value),
+                  }),
+                  canvasFabric
+                )
+              }
+            />
+            <input
+              id="contrast-value"
+              type="range"
+              min={-1}
+              max={1}
+              step={0.1}
+              defaultValue={0}
+              onChange={(e) => {
+                applyFilterValue(
+                  5,
+                  "contrast",
+                  parseFloat(e.target.value),
+                  canvasFabric
+                );
+              }}
+            />
           </div>
           <div>
             饱和
-             <input type="range"  min={-1} max={1} step={0.1} defaultValue={0} onChange = {(e)=>filter(canvasFabric,e.target.value,"饱和")}/>
+            <input
+              id="saturation"
+              type="checkbox"
+              onClick={() =>
+                applyFilter(
+                  5,
+                  new f.Saturation({
+                    contrast: parseFloat($("saturation-value").value),
+                  }),
+                  canvasFabric
+                )
+              }
+            />
+            <input
+              type="range"
+              id="saturation-value"
+              min={-1}
+              max={1}
+              step={0.1}
+              defaultValue={0}
+              onChange={(e) => {
+                applyFilterValue(
+                  5,
+                  "saturation",
+                  parseFloat(e.target.value),
+                  canvasFabric
+                );
+              }}
+            />
           </div>
         </div>
       </div>

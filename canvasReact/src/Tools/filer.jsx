@@ -1,27 +1,27 @@
 //实现滤镜
 
-const filter = (canvas, value, type) => {
-  var obj = canvas.getActiveObject();
-  if (obj) {
-    if (type === null) {
-      return;
-    }
-    if (type === "高光") {
-      obj.filters.push(
-        new fabric.Image.filters.Brightness({ brightness: value })
-      );
-    } else if (type === "对比") {
-      obj.filters.push(new fabric.Image.filters.Contrast({ contrast: value }));
-      obj.applyFilters();
-      canvas.renderAll();
-    } else if (type === "饱和") {
-      obj.filters.push(
-        new fabric.Image.filters.Saturation({ saturation: value })
-      );
+function applyFilter(index, filter,canvas) {
+  let obj = canvas.getActiveObject();
+  if(obj){
+    obj.filters[index] = filter;
+    obj.applyFilters();
+    canvas.renderAll();
+  }
+
+}
+
+function applyFilterValue(index, prop, value,canvas) {
+  let obj = canvas.getActiveObject();
+  if(obj){
+    if (obj.filters[index]) {
+      obj.filters[index][prop] = value;
       obj.applyFilters();
       canvas.renderAll();
     }
   }
-};
+ 
 
-export default filter;
+}
+
+
+export  {applyFilter,applyFilterValue};

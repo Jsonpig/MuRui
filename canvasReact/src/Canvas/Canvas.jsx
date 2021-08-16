@@ -4,8 +4,8 @@ import FabricBox from "./FabricDraw";
 import { tr, tl, tm, ml, mr, bl, br, bm } from "./pointControl";
 //画布页面
 function Canvas(props) {
-  const { divHoveredDom, divSelectedDom } = props;
   const {
+    divHoveredDom, divSelectedDom,
     canvasWidth = 650,
     canvasHeight = 730,
     canvas2Width = 650,
@@ -54,9 +54,10 @@ function Canvas(props) {
   return (
     <div id="canvas-gray">
       <div className="FabricTools">
-        鼠标点击绘制
-        <FabricBox></FabricBox>
+        Fabric鼠标点击绘制
+        <FabricBox />
       </div>
+      
       <canvas
         id="canvas3"
         ref={canvas3Ref}
@@ -114,7 +115,6 @@ function Canvas(props) {
           const { left, top } = canvasRef.current.getBoundingClientRect();
           let eX = e.clientX - left; //在画布上点击的坐标
           let eY = e.clientY - top;
-          if (type === "图片") {
             const sizeStep = (type, centerX, centerY) => {
               canvasRef.current.onmousemove = (e) => {
                 changeOldX.current = centerX - imgWidth.current / 2;
@@ -161,7 +161,7 @@ function Canvas(props) {
                   canvasRef.current.onmousemove = null;
                 };
               };
-            };
+            
             if (!showFlag.current) {
               initCanvas(canvasRef.current).liImage(
                 "图片",

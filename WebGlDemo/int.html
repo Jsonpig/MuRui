@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <title>VertexBuffer</title>
+</head>
+<body>
+<canvas id="webGl-layer"  width="532" height="300"></canvas>
+<div>
+    <label for="r1">饱和度:</label><input type="range" id="r1" value="0"/>
+</div>
+
+<div>
+    <label for="r2">R:</label><input type="range" id="r2" value="0"/>
+</div>
+
+<div>
+    <label for="r3">G:</label><input type="range" id="r3" value="0"/>
+</div>
+
+<div>
+    <label for="r4">B:</label><input type="range" id="r4" value="0"/>
+</div>
+
+<script>
+    const webgl = document.getElementById("webGl-layer").getContext("webgl");
+    const range1 = document.getElementById("r1"),
+        range2 = document.getElementById("r2"),
+        range3 = document.getElementById("r3"),
+        range4 = document.getElementById("r4");
+
+    webgl.viewport(0, 0, 532, 300);
+
+    const vertexShader2D = `
+        precision mediump float;
+        attribute vec4 position;
+        attribute vec4 inputTextureCoordinate;
+        varying vec2 textureCoordinate;
+
+        void main() {
+            gl_Position = position;
+            textureCoordinate = vec2((position.x+1.0)/2.0, 1.0-(position.y+1.0)/2.0);
+        }
+    `;
+
+    const fragmentShader2D = `
+        precision mediump float;
+        varying vec2 textureCoordinate;
+        uniform sampler2D inputImageTexture;
+        uniform float size;
+        uniform float saturation;
+        uniform float r;
+        uniform float g;
+        uniform float b;
+        uniform float a;
+
+        void main() {
+            vec4 texture = texture2D(inputImageTexture, textureCoordinate);
+            texture.r += r; // 图片整体 r 值
+            texture.g += g; // 图片整体 g 值
+            texture.b += b; // 图片整体 b 值
+            // texture.a = 0.5; // 图片整体 a 值
+
+            //饱和度
+            float average = (texture.r + texture.g + texture.b) / 3.0;
+            if (saturation > 0.0) {
+                texture.rgb += (average - texture.rgb) * (1.0 - 1.0 / (1.001 - saturation));
+            } else {
+                texture.rgb += (average - texture.rgb) * (-saturation);
+            }
+
+            gl_FragColor = texture;
+
+        }
+    `;
+
+    function createShader(gl, type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            return shader;
+        }
+        console.log(gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+    }
+
+    function createProgram(gl, vertexShader, fragmentShader) {
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        if (gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            webgl.useProgram(program);
+            return program;
+        }
+        console.error(gl.getProgramInfoLog(program));
+        gl.deleteProgram(program);
+    }
+
+    function createTextureByImageObject(gl, imgObject) {
+        gl.activeTexture(gl.TEXTURE0);
+        const textureObject = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, textureObject);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imgObject);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+        return textureObject;
+    }
+
+    const vertices = [
+        1.0, 1.0,
+        1.0, -1.0,
+        -1.0, 1.0,
+        -1.0, -1.0
+    ];
+
+    const vertexShader = createShader(webgl, webgl.VERTEX_SHADER, vertexShader2D),
+        fragmentShader = createShader(webgl, webgl.FRAGMENT_SHADER, fragmentShader2D),
+        program = createProgram(webgl, vertexShader, fragmentShader),
+        buffer = webgl.createBuffer();
+
+    webgl.bindBuffer(webgl.ARRAY_BUFFER, buffer);
+    webgl.bufferData(webgl.ARRAY_BUFFER, new Float32Array(vertices), webgl.STATIC_DRAW);
+
+    let v4PositionIndex = webgl.getAttribLocation(program, "position");
+    webgl.enableVertexAttribArray(v4PositionIndex);
+    webgl.vertexAttribPointer(v4PositionIndex, 2, webgl.FLOAT, false, 0, 0);
+
+    let img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = "http://static.atvideo.cc/2021/01/04/09/47/1609724837(1).jpg";
+    img.onload = function () {
+        document.body.append(img);
+        createTextureByImageObject(webgl, img);
+        let saturationUniform = webgl.getUniformLocation(program, "saturation");
+        let rUniform = webgl.getUniformLocation(program, "r");
+        let gUniform = webgl.getUniformLocation(program, "g");
+        let bUniform = webgl.getUniformLocation(program, "b");
+
+        const uniform = webgl.getUniformLocation(program, "inputImageTexture");
+        webgl.uniform1i(uniform, 0);
+        webgl.drawArrays(webgl.TRIANGLE_STRIP, 0, 4);
+
+        range1.addEventListener("change", function () {
+            const val = Number(range1.value) / 100;
+            webgl.uniform1f(saturationUniform, val);
+            webgl.drawArrays(webgl.TRIANGLE_STRIP, 0, 4);
+        });
+
+        range2.addEventListener("change", function () {
+            const val = Number(range2.value) / 100;
+            webgl.uniform1f(rUniform, val);
+            webgl.drawArrays(webgl.TRIANGLE_STRIP, 0, 4);
+        });
+
+        range3.addEventListener("change", function () {
+            const val = Number(range3.value) / 100;
+            webgl.uniform1f(gUniform, val);
+            webgl.drawArrays(webgl.TRIANGLE_STRIP, 0, 4);
+        });
+
+        range4.addEventListener("change", function () {
+            const val = Number(range4.value) / 100;
+            webgl.uniform1f(bUniform, val);
+            webgl.drawArrays(webgl.TRIANGLE_STRIP, 0, 4);
+        });
+    }
+
+</script>
+
+</body>
+</html>
