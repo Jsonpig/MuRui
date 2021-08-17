@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useReducer } from "react";
 import { isGroup, unGroup } from "../Tools/groupControl";
 import rubber from "../Tools/rubber";
 import patternBrush from "../Tools/PatternBrush";
 import { applyFilter, applyFilterValue } from "../Tools/filer";
+import { initialState, reducer } from "../Tools/states";
 
 let fabric = window.fabric;
 function FabricBox() {
-  const [brushValue, setBrushValue] = useState("Pencil");
-  const [widthValue, setwidthValue] = useState(10);
+  const [state,dispatch] = useReducer(reducer,initialState)
   let canvasFabric = new fabric.Canvas("canvas3");
   let downX = 0;
   let downY = 0;
@@ -82,7 +82,6 @@ function FabricBox() {
       width: moveX - downX,
       height: moveY - downY,
       fill: "green",
-      // isDrawingMode:false
     });
     remove(canvasObj);
   };
@@ -238,8 +237,8 @@ function FabricBox() {
             onClick={() => {
               patternBrush(
                 canvasFabric,
-                brushValue,
-                widthValue,
+                state.brushValue,
+                state.widthValue,
                 "ControlValueBrush"
               );
             }}
@@ -250,7 +249,7 @@ function FabricBox() {
           <select
             onChange={(e) => {
               patternBrush(canvasFabric, e.target.value, 10, "pattern");
-              setBrushValue(e.target.value);
+              dispatch({type:"brushValue",brushValue:e.target.value});
             }}
           >
             <option value="Pencil">Pencil</option>
@@ -264,8 +263,8 @@ function FabricBox() {
             max={50}
             defaultValue={5}
             onChange={(e) => {
-              patternBrush(canvasFabric, brushValue, e.target.value, "width");
-              setwidthValue(e.target.value);
+              patternBrush(canvasFabric, state.brushValue, e.target.value, "width");
+              dispatch({type:"widthValue",widthValue:e.target.value});
             }}
           />
         </div>

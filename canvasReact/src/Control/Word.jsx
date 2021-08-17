@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useReducer } from "react";
 import { initCanvas } from "../Tools/All";
+import { reducer, initialState } from "../Tools/states";
 /* 字体 */
 function Word(props) {
-  const [textValue, setTextValue] = useState("微软雅黑");
-  const [fontSize, setFontSize] = useState(null);
-  const [textQi, setTextQi] = useState("start");
+  const [state, dispatch] = useReducer(reducer, initialState);
   const {canvasDom ,canvas2Dom,writeText} = props
   return (
     <div id="word">
@@ -12,11 +11,11 @@ function Word(props) {
       <div>
         {" "}
         字号
-        <input type="text" onChange={(e) => setFontSize(e.target.value)} />
+        <input type="text" onChange={(e) => dispatch({type:"fontSize",fontSize:e.target.value})} />
         <button
           type="submit"
           onClick={() =>
-            initCanvas(canvasDom,canvas2Dom).changeTextSize("文本", writeText, fontSize)
+            initCanvas(canvasDom,canvas2Dom).changeTextSize("文本", writeText, state.fontSize)
           }
         >
           提交
@@ -27,11 +26,11 @@ function Word(props) {
         字体
         <select
           onChange={(e) => {
-            (e) => setTextValue(e.target.value);
+            (e) => dispatch({type:"textValue",textValue:e.target.value})
             initCanvas(canvasDom,canvas2Dom).changeTextSize(
               "文本",
               writeText,
-              fontSize,
+              state.fontSize,
               e.target.value
             );
           }}
@@ -45,12 +44,12 @@ function Word(props) {
         对齐方式
         <select
           onChange={(e) => {
-            setTextQi(e.target.value);
+            dispatch({type:"textQi",textQi:e.target.value});
             initCanvas(canvasDom,canvas2Dom).changeTextSize(
               "文本",
               writeText,
-              fontSize,
-              textValue,
+              state.fontSize,
+              state.textValue,
               e.target.value
             );
           }}
@@ -70,9 +69,9 @@ function Word(props) {
             initCanvas(canvasDom,canvas2Dom).changeTextSize(
               "文本",
               writeText,
-              fontSize,
-              textValue,
-              textQi,
+              state.fontSize,
+              state.textValue,
+              state.textQi,
               e.target.value
             )
           }

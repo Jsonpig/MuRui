@@ -1,12 +1,10 @@
-import React, { useState } from "react";
+import React, { useReducer } from "react";
 import { initCanvas } from "../Tools/All";
-
+import {initialState,reducer} from "../Tools/states"
 
 function Image(props) {
-  const { canvasDom,canvas2Dom,x,y,setX,setY} = props;
-  const [imgUrl, setImgUrl] = useState(null);
-  const [cWidth, setCWidth] = useState(100);
-  const [cHeight, setCHeight] = useState(50);
+  const { canvasDom, canvas2Dom, x, y, setX, setY } = props;
+  const [state, dispatch] = useReducer(reducer, initialState);
   return (
     <li>
       图片
@@ -15,9 +13,9 @@ function Image(props) {
         <input
           type="text"
           placeholder="输入图片地址"
-          defaultValue = "ttps://cdn1.mihuiai.com/media/images/5ee5fd5a-f112-4b6b-b742-d58efeaa0775_thumb.png"
+          defaultValue="ttps://cdn1.mihuiai.com/media/images/5ee5fd5a-f112-4b6b-b742-d58efeaa0775_thumb.png"
           onChange={(e) => {
-            initCanvas(canvasDom,canvas2Dom).liImage(
+            initCanvas(canvasDom, canvas2Dom).liImage(
               "图片",
               e.target.value,
               100,
@@ -25,7 +23,7 @@ function Image(props) {
               0,
               0
             );
-            setImgUrl(e.target.value);
+            dispatch({ type: "changeImgUrl", imgUrl: e.target.value });
           }}
         />
       </div>
@@ -36,16 +34,16 @@ function Image(props) {
             <input
               type="range"
               onChange={(e) => {
-                if (imgUrl) {
-                  initCanvas(canvasDom,canvas2Dom).liImage(
+                if (state.imgUrl) {
+                  initCanvas(canvasDom, canvas2Dom).liImage(
                     "图片",
-                    imgUrl,
+                    state.imgUrl,
                     e.target.value,
-                    cHeight,
+                    state.cHeight,
                     x,
                     y
                   );
-                  setCWidth(e.target.value);
+                  dispatch({ type: "changeCWidth", cWidth: e.target.value });
                 }
               }}
             />
@@ -57,11 +55,11 @@ function Image(props) {
             <input
               type="range"
               onChange={(e) => {
-                if (imgUrl) setCHeight(e.target.value);
-                initCanvas(canvasDom,canvas2Dom).liImage(
+                if (state.imgUrl) dispatch({ type: "changeCHeight", cHeight: e.target.value });;
+                initCanvas(canvasDom, canvas2Dom).liImage(
                   "图片",
-                  imgUrl,
-                  cWidth,
+                  state.imgUrl,
+                  state.cWidth,
                   e.target.value,
                   x,
                   y
@@ -76,13 +74,13 @@ function Image(props) {
             <input
               type="range"
               onChange={(e) => {
-                if (imgUrl) {
+                if (state.imgUrl) {
                   setX(e.target.value);
-                  initCanvas(canvasDom,canvas2Dom).liImage(
+                  initCanvas(canvasDom, canvas2Dom).liImage(
                     "图片",
-                    imgUrl,
-                    cWidth,
-                    cHeight,
+                    state.imgUrl,
+                    state.cWidth,
+                    state.cHeight,
                     e.target.value,
                     y
                   );
@@ -97,13 +95,13 @@ function Image(props) {
             <input
               type="range"
               onChange={(e) => {
-                if (imgUrl) {
+                if (state.imgUrl) {
                   setY(e.target.value);
-                  initCanvas(canvasDom,canvas2Dom).liImage(
+                  initCanvas(canvasDom, canvas2Dom).liImage(
                     "图片",
-                    imgUrl,
-                    cWidth,
-                    cHeight,
+                    state.imgUrl,
+                    state.cWidth,
+                    state.cHeight,
                     x,
                     e.target.value
                   );

@@ -1,12 +1,10 @@
-import React, { useState } from "react";
-import { initCanvas,drawType } from "../Tools/All";
+import React, { useReducer } from "react";
+import { initCanvas, drawType } from "../Tools/All";
+import { initialState, reducer } from "../Tools/states";
 
 function ControlBroad(props) {
-  const { canvasDom,canvas2Dom } = props;
-  const [value, setValue] = useState("black");
-  const [value2, setValue2] = useState(50);
-  const [value3, setValue3] = useState(0);
-  const [value4, setValue4] = useState(50);
+  const { canvasDom, canvas2Dom } = props;
+  const [state, dispatch] = useReducer(reducer, initialState);
   const selectMenRef = React.useRef(null);
   return (
     <div id="cotrolBroad">
@@ -16,12 +14,19 @@ function ControlBroad(props) {
         <input
           type="text"
           id="change"
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) =>
+            dispatch({ type: "colorValue", colorValue: e.target.value })
+          }
         />
         <button
           type="submit"
           id="changeColor"
-          onClick={() => initCanvas(canvasDom,canvas2Dom).changeColor(value, value2)}
+          onClick={() =>
+            initCanvas(canvasDom, canvas2Dom).changeColor(
+              state.colorValue,
+              state.sizeValue
+            )
+          }
         >
           提交
         </button>
@@ -32,8 +37,8 @@ function ControlBroad(props) {
         <input
           type="range"
           onChange={(e) => {
-            setValue2(e.target.value);
-            initCanvas(canvasDom,canvas2Dom).changeSize(e.target.value);
+            dispatch({ type: "sizeValue", sizeValue: e.target.value });
+            initCanvas(canvasDom, canvas2Dom).changeSize(e.target.value);
           }}
         />
       </div>
@@ -43,8 +48,11 @@ function ControlBroad(props) {
         <input
           type="range"
           onChange={(e) => {
-            setValue3(e.target.value);
-            initCanvas(canvasDom,canvas2Dom).changeOpacity(e.target.value, value2);
+            dispatch({ type: "opacityValue", opacityValue: e.target.value });
+            initCanvas(canvasDom, canvas2Dom).changeOpacity(
+              e.target.value,
+              state.sizeValue
+            );
           }}
         />
       </div>
@@ -54,8 +62,14 @@ function ControlBroad(props) {
         <input
           type="range"
           onChange={(e) => {
-            setValue4(e.target.value);
-            initCanvas(canvasDom,canvas2Dom).rotateImage(value4 - e.target.value, value2);
+            dispatch({
+              type: "rotateValueInput",
+              rotateValueInput: e.target.value,
+            });
+            initCanvas(canvasDom, canvas2Dom).rotateImage(
+              state.rotateValueInput - e.target.value,
+              state.sizeValue
+            );
           }}
         />
       </div>
@@ -65,7 +79,10 @@ function ControlBroad(props) {
         <select
           ref={selectMenRef}
           onChange={(e) =>
-            initCanvas(canvasDom,canvas2Dom).compositeOperation(e.target.value, drawType)
+            initCanvas(canvasDom, canvas2Dom).compositeOperation(
+              e.target.value,
+              drawType
+            )
           }
         >
           <option value="source-over">source-over</option>
@@ -103,7 +120,11 @@ function ControlBroad(props) {
           type="text"
           placeholder="色-色(圆)-色(矩）"
           onChange={(e) => {
-            initCanvas(canvasDom,canvas2Dom).Gradient(drawType, value2, e.target.value);
+            initCanvas(canvasDom, canvas2Dom).Gradient(
+              drawType,
+              state.sizeValue,
+              e.target.value
+            );
           }}
         />{" "}
       </div>
