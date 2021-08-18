@@ -5,23 +5,37 @@
   html {
     height: 100%;
     width: 100%;
-    .Home{
-      #webglCanvas{
-        
-        border: 3px solid  #ff6700
+    .Home {
+      #webglCanvas {
+        border: 3px solid #ff6700;
       }
       .Choose {
         position: absolute;
         right: 40px;
         top: 20px;
-        a{
+        a {
           display: block;
           color: black;
           text-decoration: none;
           font-size: 25px;
         }
-        a:hover{
-        color:yellowgreen;
+        a:hover {
+          color: yellowgreen;
+        }
+      }
+      .fabricDraw {
+        #canvas3 {
+
+          border: 2px solid pink;
+        }
+        .canvas-container {
+          width: 100% !important;
+          height: 100% !important;
+          z-index: 1;
+          .upper-canvas {
+            left: 0% !important;
+            top: 0% !important;
+          }
         }
       }
     }
@@ -104,7 +118,7 @@
     }
     #canvas-gray {
       height: 750px;
-      width: 1300px;
+      width: 1000px;
       position: absolute;
       left: 220px;
       top: 150px;
@@ -118,20 +132,6 @@
         position: absolute;
         z-index: 1000;
       }
-      .canvas-container {
-        width: 100% !important;
-        height: 100% !important;
-        z-index: 1;
-        #canvas3 {
-          top: 50% !important;
-          left: 50% !important;
-        }
-        .upper-canvas {
-          left: 50% !important;
-          top: 1.3% !important;
-          transform: translateX(-50%);
-        }
-      }
       #canvas {
         position: absolute;
         left: 50%;
@@ -141,12 +141,6 @@
       #canvas2 {
         position: absolute;
         background-color: white;
-        left: 50%;
-        transform: translateX(-50%) translateY(-50%);
-        top: 50%;
-      }
-      #canvas3 {
-        position: absolute;
         left: 50%;
         transform: translateX(-50%) translateY(-50%);
         top: 50%;

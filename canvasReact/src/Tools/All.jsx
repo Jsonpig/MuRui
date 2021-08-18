@@ -39,7 +39,6 @@ const contorlRect = (removeX, removeY) => {
   return path;
 };
 
-
 const initCanvas = (canvasDom, canvas2Dom, value) => {
   if (canvasDom) {
     const canvasEle = {
@@ -181,39 +180,6 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
       ctx2.fill(r9);
       ctx2.closePath();
       ctx2.restore();
-    };
-    //引入图片
-    const liImage = (
-      newDrawType,
-      imgUrl,
-      cWidth,
-      cHeight,
-      x,
-      y,
-      removeX,
-      removeY
-    ) => {
-      drawType = newDrawType;
-      img.crossOrigin = "anonymous";
-      img.src = imgUrl;
-
-      img.onload = () => {
-        ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(x * 10, y * 10, cWidth * 10, cHeight * 10);
-        ctx.stroke();
-        ctx.closePath();
-        ctx.clip();
-        ctx.lineWidth = 1;
-        if (removeX === undefined && removeY === undefined) {
-          ctx.drawImage(img, 0, 0, 200, 200);
-        } else {
-          ctx.drawImage(img, removeX, removeY, 200, 200);
-        }
-        ctx.restore();
-      };
-      // https://cdn1.mihuiai.com/media/images/5ee5fd5a-f112-4b6b-b742-d58efeaa0775_thumb.png
     };
 
     //判断是否点击到图像内部
@@ -440,6 +406,41 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
         ctx.stroke();
       }
     };
+
+    //引入图片
+    const liImage = (
+      newDrawType,
+      imgUrl,
+      cWidth,
+      cHeight,
+      x,
+      y,
+      removeX,
+      removeY
+    ) => {
+      drawType = newDrawType;
+      img.crossOrigin = "anonymous";
+      img.src = imgUrl;
+
+      img.onload = () => {
+        ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x * 10, y * 10, cWidth * 10, cHeight * 10);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.clip();
+        ctx.lineWidth = 1;
+        if (removeX === undefined && removeY === undefined) {
+          ctx.drawImage(img, 0, 0, 200, 200);
+        } else {
+          ctx.drawImage(img, removeX, removeY, 200, 200);
+        }
+        ctx.restore();
+      };
+      // https://cdn1.mihuiai.com/media/images/5ee5fd5a-f112-4b6b-b742-d58efeaa0775_thumb.png
+    };
+
     //旋转
     const rotateImage = (
       rot,

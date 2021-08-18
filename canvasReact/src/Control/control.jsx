@@ -1,5 +1,4 @@
 import React from "react";
-// import { initCanvas } from "../Tools/All";
 import TopWord from "./TopWord";
 import ControlBroad from "./ControlBroad";
 import Shadow from "./Shadow";
