@@ -7,7 +7,6 @@ function applyFilter(index, filter,canvas) {
     obj.applyFilters();
     canvas.renderAll();
   }
-
 }
 
 function applyFilterValue(index, prop, value,canvas) {

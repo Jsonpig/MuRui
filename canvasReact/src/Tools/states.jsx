@@ -19,9 +19,6 @@ const initialState = {
   textValue: "微软雅黑",
   fontSize: null,
   textQi: "start",
-
-  brushValue: "Pencil",
-  widthValue:10
 };
 
 const reducer = (state, action) => {
@@ -121,17 +118,7 @@ const reducer = (state, action) => {
         ...state,
         textQi: action.textQi,
       };
-    case "brushValue":
-      return {
-        ...state,
-        brushValue: action.brushValue,
-      };
-    case "widthValue":
-    return{
-        ...state,
-        widthValue:action.widthValue
-    }
-      default:
+    default:
       throw new Error();
   }
 };

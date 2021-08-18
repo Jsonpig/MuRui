@@ -3,13 +3,11 @@ import { isGroup, unGroup } from "../Tools/groupControl";
 import rubber from "../Tools/rubber";
 import patternBrush from "../Tools/PatternBrush";
 import { applyFilter, applyFilterValue } from "../Tools/filer";
-import { initialState, reducer } from "../Tools/states";
 let fabric = window.fabric;
 
 function FabricBox() {
   const canvas4Ref = React.useRef(null);
-  const [state, dispatch] = useReducer(reducer, initialState);
-  let canvasFabric = new fabric.Canvas("canvas3");
+  let canvasFabric = null;
   let downX = 0;
   let downY = 0;
   let moveX = 0;
@@ -28,6 +26,12 @@ function FabricBox() {
     stopDraw = !stopDraw;
   };
 
+  //定义canvasFabric 只执行一次
+  const fabricExist = () => {
+    if (!canvasFabric) {
+      canvasFabric = new fabric.Canvas("canvas3");
+    }
+  };
   const initEvent = () => {
     canvasFabric.on("mouse:down", (event) => {
       downX = event.e.offsetX;
@@ -155,8 +159,8 @@ function FabricBox() {
       }
     );
   };
-
   const fabricType = (type) => {
+    fabricExist();
     initEvent();
     if (types === type) return;
     types = type;
@@ -207,6 +211,13 @@ function FabricBox() {
       >
         图片
       </button>
+      <button
+        onClick={() => {
+          patternBrush(canvasFabric);
+        }}
+      >
+        画笔
+      </button>
       <div>
         <button id="group" onClick={() => isGroup(canvasFabric)}>
           组合
@@ -231,48 +242,7 @@ function FabricBox() {
             }}
           />
         </div>
-        <div>
-          {" "}
-          <button
-            onClick={() => {
-              patternBrush(
-                canvasFabric,
-                state.brushValue,
-                state.widthValue,
-                "ControlValueBrush"
-              );
-            }}
-          >
-            画笔
-          </button>
-          模式
-          <select
-            onChange={(e) => {
-              patternBrush(canvasFabric, e.target.value, 10, "pattern");
-              dispatch({ type: "brushValue", brushValue: e.target.value });
-            }}
-          >
-            <option value="Pencil">Pencil</option>
-            <option value="Circle">Circle</option>
-            <option value="Spray">Spray</option>
-          </select>
-          行宽
-          <input
-            type="range"
-            min={5}
-            max={50}
-            defaultValue={5}
-            onChange={(e) => {
-              patternBrush(
-                canvasFabric,
-                state.brushValue,
-                e.target.value,
-                "width"
-              );
-              dispatch({ type: "widthValue", widthValue: e.target.value });
-            }}
-          />
-        </div>
+        <div></div>
         <div>
           <div>
             高光

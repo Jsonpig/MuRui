@@ -203,7 +203,7 @@ const initCanvas = (canvasDom, canvas2Dom, value) => {
 
     //获取像素点
     const pick = (event, divDom) => {
-      const x = event.clientX - 545;
+      const x = event.clientX - 395;
       const y = event.clientY - 160;
       const pixel = ctx.getImageData(x, y, 1, 1);
       const data = pixel.data;
