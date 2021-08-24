@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas id="glcanvas" width="800" height="800"></canvas>
+    <script type="module" src="./parametric.js"></script>
+    <script>
+      const canvas = document.getElementById("glcanvas");
+      const gl = canvas.getContext("webgl");
+
+      //创建顶点着色器
+      const vsSource = `
+         attribute vec4 a_Position;
+         void main (){
+           //内值变量 表示当前点的位置
+           gl_Position = a_Position;
+           //表示当前点点大小 必须是浮点类型 否则会报错
+           gl_PointSize =5.0;
+         }
+      `;
+      //创建片元着色器
+      const fsSource = `
+         precision mediump float;
+         void main(){
+          //vec4 四维向量 表示用来表示RGBA的值 均为浮点数
+          gl_FragColor = vec4(0.1,0.1,0.2,1.0);
+         }
+      `;
+
+      // 初始化着色器
+      function createShader(gl, type, source) {
+        //创建shader对象
+        let shader = gl.createShader(type);
+        //往shader中传入源代码
+        gl.shaderSource(shader, source);
+        //编译shader
+        gl.compileShader(shader);
+        //判断是否编译成功
+        let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+        if (success) {
+          return shader;
+        }
+        //编译失败打印
+        console.log(gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+      }
+
+      //初始化对象
+      function createProgram(gl, vsShader, fsShader) {
+        let program = gl.createProgram();
+        //往program中传入 webglShader对象
+        gl.attachShader(program, vsShader);
+        gl.attachShader(program, fsShader);
+        //连接 program
+        gl.linkProgram(program);
+        //判断链接是否成功
+        let success = gl.getProgramParameter(program, gl.LINK_STATUS);
+        if (success) {
+          return program;
+        }
+        console.log(gl.getProgramInfoLog(program));
+        gl.deleteProgram(program);
+      }
+
+      function initWebGL(gl, vsSource, fsSource) {
+        //根据源代码创建顶点着色器
+        let vsShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
+        //根据源代码创建片元着色器
+        let fsShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+        //创建WebGLProgram 程序
+        let program = createProgram(gl, vsShader, fsShader);
+        return program;
+      }
+
+      //   function draw(
+      //     points,
+      //     context,
+      //     { strokeStyle = "black", fillStyle = null, close = false } = {}
+      //   ) {
+      //     context.strokeStyle = strokeStyle;
+      //     context.beginPath();
+      //     context.moveTo(...points[0]);
+      //     for (let i = 1; i < points.length; i++) {
+      //       context.lineTo(...points[i]);
+      //     }
+      //     if (close) {
+      //       context.closePath();
+      //     }
+      //     if (fillStyle) {
+      //       context.fillStyle = fillStyle;
+      //       context.fill();
+      //     }
+      //     context.stroke();
+      //   }
+
+      function parametric(xFunc, yFunc) {
+        return function (start, end, seg=100, ...args) {
+          const points = [];
+          for (let i = 0; i <= seg; i++) {
+            const p = i / seg;
+            const t = start * (1 - p) + end * p;
+            const x = xFunc(t, ...args);
+            const y = yFunc(t, ...args);
+            points.push([x, y]);
+          }
+          return {
+            points,
+          };
+        };
+      }
+
+      //抛物线方程
+      const para = parametric(
+        (t) => 0.25 * t,
+        (t) => 0.25* t ** 2
+      );
+      const helical = parametric(
+        (t, l) => l * t * Math.cos(t),
+        (t, l) => l * t * Math.sin(t)
+      );
+
+      const star = parametric(
+        (t, l) => l * Math.cos(t) ** 3,
+        (t, l) => l * Math.sin(t) ** 3
+      );
+      //圆
+      const circle = parametric(
+        (t, l) => l * Math.cos(t),
+        (t, l) => l * Math.sin(t)
+      );
+
+       const ellipse = parametric(
+           (t,a,b)=>a*Math.cos(t),
+           (t,a,b)=>b*Math.sin(t),
+       )
+      //抛物线
+       const pointPos = para(-1.5,1.5).points.flat();
+      //圆形
+      //   const pointPos = circle(0, Math.PI * 2, 100, 0.5).points.flat();
+      //阿基米德螺旋线
+      //   const pointPos = helical(0, 50, 500, 0.02).points.flat();
+      //星形线
+    //   const pointPos = star(0, Math.PI * 2, 100, 0.5).points.flat();
+      //椭圆
+    //   const pointPos = ellipse(0, Math.PI * 2, 100, 0.2,0.3).points.flat();
+
+      //创建缓冲区
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(pointPos),
+        gl.STATIC_DRAW
+      );
+
+      //初始化shader程序
+      const program = initWebGL(gl, vsSource, fsSource);
+      gl.useProgram(program);
+
+      const a_Position = gl.getAttribLocation(program, "a_Position");
+
+      gl.vertexAttribPointer(
+        a_Position, //需要修改的顶点属性
+        2, //每个顶点属性的组成数量 几个数据组成了顶点属性
+        gl.FLOAT, //数据的类型
+        false, //是否进行归一化处理
+        Float32Array.BYTES_PER_ELEMENT * 2, //顶点之间的偏移量
+        0 //顶点属性数组中1部分字节的偏移量
+      );
+
+      gl.enableVertexAttribArray(a_Position);
+      //开始绘制 gl.POINTS绘制点 ,0表示第一个点的索引 ，1便是宫绘制几个点
+      gl.drawArrays(gl.LINE_STRIP, 0, pointPos.length / 2);
+    </script>
+  </body>
+</html>
